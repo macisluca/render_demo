@@ -1,5 +1,3 @@
-
-
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html
@@ -14,6 +12,7 @@ DATA_PATH = 'data/interim/data_ready/'
 
 # Initialize the Dash app with a Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+server = app.server
 
 # Helper function to load all CSVs and concatenate into a single DataFrame
 def load_all_data():
