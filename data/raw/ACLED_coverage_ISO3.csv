@@ -1,0 +1,244 @@
+Country,Time Period,ISO_3166-3
+China,2018-01-01,CHN
+Japan,2018-01-01,JPN
+Mongolia,2018-01-01,MNG
+North Korea,2018-01-01,PRK
+South Korea,2018-01-01,KOR
+Taiwan,2018-01-01,TWN
+Afghanistan,2017-01-01,AFG
+Armenia,2018-01-01,ARM
+Azerbaijan,2018-01-01,AZE
+Georgia,2018-01-01,GEO
+Kazakhstan,2018-01-01,KAZ
+Kyrgyzstan,2018-01-01,KGZ
+Tajikistan,2018-01-01,TJK
+Turkmenistan,2018-01-01,TKM
+Uzbekistan,2018-01-01,UZB
+Albania,2018-01-01,ALB
+Andorra,2020-01-01,AND
+Austria,2020-01-01,AUT
+Bailiwick of Guernsey,2020-01-01,GGY
+Bailiwick of Jersey,2020-01-01,JEY
+Belarus,2018-01-01,BLR
+Belgium,2020-01-01,BEL
+Bosnia and Herzegovina,2018-01-01,BIH
+Bulgaria,2018-01-01,BGR
+Croatia,2018-01-01,HRV
+Cyprus,2018-01-01,CYP
+Czech Republic,2020-01-01,CZE
+Denmark,2020-01-01,DNK
+Estonia,2020-01-01,EST
+Faroe Islands,2020-01-01,FRO
+Finland,2020-01-01,FIN
+France,2020-01-01,FRA
+Germany,2020-01-01,DEU
+Gibraltar,2020-01-01,GIB
+Greece,2018-01-01,GRC
+Greenland,2020-01-01,GRL
+Hungary,2020-01-01,HUN
+Iceland,2020-01-01,ISL
+Ireland,2020-01-01,IRL
+Isle of Man,2020-01-01,IMN
+Italy,2020-01-01,ITA
+Kosovo,2018-01-01,XKX
+Latvia,2020-01-01,LVA
+Liechtenstein,2020-01-01,LIE
+Lithuania,2020-01-01,LTU
+Luxembourg,2020-01-01,LUX
+Malta,2020-01-01,MLT
+Moldova,2018-01-01,MDA
+Monaco,2020-01-01,MCO
+Montenegro,2018-01-01,MNE
+Netherlands,2020-01-01,NLD
+North Macedonia,2018-01-01,MKD
+Norway,2020-01-01,NOR
+Poland,2020-01-01,POL
+Portugal,2020-01-01,PRT
+Romania,2018-01-01,ROU
+Russia,2018-01-01,RUS
+San Marino,2020-01-01,SMR
+Serbia,2018-01-01,SRB
+Slovakia,2020-01-01,SVK
+Slovenia,2020-01-01,SVN
+Spain,2020-01-01,ESP
+Sweden,2020-01-01,SWE
+Switzerland,2020-01-01,CHE
+Ukraine,2018-01-01,UKR
+United Kingdom,2020-01-01,GBR
+Vatican City,2020-01-01,VAT
+Syria,2017-01-01,SYR
+Iraq,2016-01-01,IRQ
+Turkey,2016-01-01,TUR
+Iran,2016-01-01,IRN
+Saudi Arabia,2015-01-01,SAU
+Yemen,2015-01-01,YEM
+United Arab Emirates,2016-01-01,ARE
+Israel,2016-01-01,ISR
+Jordan,2016-01-01,JOR
+Palestine,2016-01-01,PSE
+Lebanon,2016-01-01,LBN
+Oman,2016-01-01,OMN
+Kuwait,2016-01-01,KWT
+Qatar,2016-01-01,QAT
+Bahrain,2016-01-01,BHR
+Bangladesh,2010-01-01,BGD
+Bhutan,2020-01-01,BTN
+Brunei,2020-01-01,BRN
+Cambodia,2010-01-01,KHM
+East Timor,2020-01-01,TLS
+India,2016-01-01,IND
+Indonesia,2015-01-01,IDN
+Laos,2010-01-01,LAO
+Malaysia,2018-01-01,MYS
+Maldives,2020-01-01,MDV
+Myanmar,2010-01-01,MMR
+Nepal,2010-01-01,NPL
+Pakistan,2010-01-01,PAK
+Philippines,2016-01-01,PHL
+Singapore,2020-01-01,SGP
+Sri Lanka,2010-01-01,LKA
+Thailand,2010-01-01,THA
+Vietnam,2010-01-01,VNM
+Algeria,1997-01-01,DZA
+Angola,1997-01-01,AGO
+Benin,1997-01-01,BEN
+Botswana,1997-01-01,BWA
+British Indian Ocean Territory,2018-01-01,IOT
+Burkina Faso,1997-01-01,BFA
+Burundi,1997-01-01,BDI
+Cameroon,1997-01-01,CMR
+Cape Verde,2020-01-01,CPV
+Central African Republic,1997-01-01,CAF
+Chad,1997-01-01,TCD
+Comoros,2020-01-01,COM
+Democratic Republic of Congo,1997-01-01,COD
+Republic of Congo,1997-01-01,COG
+Ivory Coast,1997-01-01,CIV
+Djibouti,1997-01-01,DJI
+Egypt,1997-01-01,EGY
+Equatorial Guinea,1997-01-01,GNQ
+Eritrea,1997-01-01,ERI
+eSwatini,1997-01-01,SWZ
+Ethiopia,1997-01-01,ETH
+Gabon,1997-01-01,GAB
+Gambia,1997-01-01,GMB
+Ghana,1997-01-01,GHA
+Guinea,1997-01-01,GIN
+Guinea-Bissau,1997-01-01,GNB
+Kenya,1997-01-01,KEN
+Lesotho,1997-01-01,LSO
+Liberia,1997-01-01,LBR
+Libya,1997-01-01,LBY
+Madagascar,1997-01-01,MDG
+Malawi,1997-01-01,MWI
+Mali,1997-01-01,MLI
+Mauritania,1997-01-01,MRT
+Mauritius,2020-01-01,MUS
+Mayotte,2020-01-01,MYT
+Morocco,1997-01-01,MAR
+Mozambique,1997-01-01,MOZ
+Namibia,1997-01-01,NAM
+Niger,1997-01-01,NER
+Nigeria,1997-01-01,NGA
+Reunion,2020-01-01,REU
+Rwanda,1997-01-01,RWA
+"Saint Helena, Ascension and Tristan da Cunha",2020-01-01,SHN
+Sao Tome and Principe,2020-01-01,STP
+Senegal,1997-01-01,SEN
+Seychelles,2020-01-01,SYC
+Sierra Leone,1997-01-01,SLE
+Somalia,1997-01-01,SOM
+South Africa,1997-01-01,ZAF
+South Sudan,2011-01-01,SSD
+Sudan,1997-01-01,SDN
+Tanzania,1997-01-01,TZA
+Togo,1997-01-01,TGO
+Tunisia,1997-01-01,TUN
+Uganda,1997-01-01,UGA
+Zambia,1997-01-01,ZMB
+Zimbabwe,1997-01-01,ZWE
+Puerto Rico,2018-01-01,PRI
+Guadeloupe,2018-01-01,GLP
+Martinique,2018-01-01,MTQ
+French Guiana,2018-01-01,GUF
+Curacao,2018-01-01,CUW
+Aruba,2018-01-01,ABW
+"Virgin Islands, U.S.",2018-01-01,VIR
+Cayman Islands,2018-01-01,CYM
+Sint Maarten,2018-01-01,SXM
+Turks and Caicos Islands,2018-01-01,TCA
+British Virgin Islands,2018-01-01,VGB
+Caribbean Netherlands,2018-01-01,BES
+Anguilla,2018-01-01,AIA
+Montserrat,2018-01-01,MSR
+Falkland Islands,2018-01-01,FLK
+Brazil,2018-01-01,BRA
+Mexico,2018-01-01,MEX
+Colombia,2018-01-01,COL
+Argentina,2018-01-01,ARG
+Peru,2018-01-01,PER
+Venezuela,2018-01-01,VEN
+Chile,2018-01-01,CHL
+Guatemala,2018-01-01,GTM
+Ecuador,2018-01-01,ECU
+Cuba,2018-01-01,CUB
+Bolivia,2018-01-01,BOL
+Haiti,2018-01-01,HTI
+Dominican Republic,2018-01-01,DOM
+Honduras,2018-01-01,HND
+Paraguay,2018-01-01,PRY
+El Salvador,2018-01-01,SLV
+Nicaragua,2018-01-01,NIC
+Costa Rica,2018-01-01,CRI
+Panama,2018-01-01,PAN
+Uruguay,2018-01-01,URY
+Jamaica,2018-01-01,JAM
+Trinidad and Tobago,2018-01-01,TTO
+Guyana,2018-01-01,GUY
+Suriname,2018-01-01,SUR
+Bahamas,2018-01-01,BHS
+Belize,2018-01-01,BLZ
+Barbados,2018-01-01,BRB
+Saint Lucia,2018-01-01,LCA
+Saint Vincent and the Grenadines,2018-01-01,VCT
+Grenada,2018-01-01,GRD
+Antigua and Barbuda,2018-01-01,ATG
+Dominica,2018-01-01,DMA
+Saint-Barthelemy,2018-01-01,BLM
+Saint-Martin,2018-01-01,MAF
+Saint Kitts and Nevis,2018-01-01,KNA
+South Georgia and the South Sandwich Islands,2018-01-01,SGS
+Canada,2021-01-01,CAN
+Bermuda,2021-01-01,BMU
+Saint Pierre and Miquelon,2021-01-01,SPM
+United States,2020-01-01,USA
+Australia,2021-01-01,AUS
+New Zealand,2021-01-01,NZL
+Fiji,2021-01-01,FJI
+New Caledonia,2021-01-01,NCL
+Vanuatu,2021-01-01,VUT
+Solomon Islands,2021-01-01,SLB
+Papua New Guinea,2021-01-01,PNG
+Micronesia,2021-01-01,FSM
+Guam,2021-01-01,GUM
+Nauru,2021-01-01,NRU
+Marshall Islands,2021-01-01,MHL
+Kiribati,2021-01-01,KIR
+Palau,2021-01-01,PLW
+Northern Mariana Islands,2021-01-01,MNP
+American Samoa,2021-01-01,ASM
+Cook Islands,2021-01-01,COK
+French Polynesia,2021-01-01,PYF
+Norfolk Island,2021-01-01,NFK
+Niue,2021-01-01,NIU
+Samoa,2021-01-01,WSM
+Tonga,2021-01-01,TON
+Tokelau,2021-01-01,TKL
+Tuvalu,2021-01-01,TUV
+Pitcairn,2021-01-01,PCN
+Wallis and Futuna,2021-01-01,WLF
+Heard Island and McDonald Islands,2021-01-01,HMD
+Cocos (Keeling) Islands,2021-01-01,CCK
+Christmas Island,2021-01-01,CXR
+United States Minor Outlying Islands,2021-01-01,UMI
+Antarctica,2021-01-01,ATA
