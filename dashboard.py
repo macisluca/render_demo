@@ -80,6 +80,7 @@ monitoring_layout = html.Div([
         dcc.Dropdown(id='ranking-column', options=column_options, value='violence index', clearable=False, className='dcc-dropdown'),
         dcc.Dropdown(id='ranking-date', options=[{'label': date, 'value': date} for date in available_dates], value=default_date, clearable=False, className='dcc-dropdown'),
         dcc.Graph(id='bar-plot', className='dcc-graph'),
+        html.H3('Select number of countries:'),
         dcc.Slider(id='num-countries', min=10, max=235, step=10, value=10, marks={i: str(i) for i in range(10, 236, 10)}),
         dcc.Graph(id='world-map', className='dcc-graph'),
         html.H2('Countries Stats Over Time'),
@@ -98,9 +99,12 @@ monitoring_layout = html.Div([
 forecasting_layout = html.Div([
     html.H1('Forecasting Dashboard'),
     dcc.Dropdown(id='forecast-date', options=[{'label': date, 'value': date} for date in available_forecast_dates], value=default_forecast_date, clearable=False, className='dcc-dropdown'),
+    html.H3('Select forecasted week:'),
     dcc.Slider(id='forecast-slider', min=0, max=11, step=1, value=0, marks={i: f'Forecast {i+1}' for i in range(12)}),
+    html.H3('Select outcome level:'),
     dcc.Slider(id='percentile-slider', min=0, max=100, step=1, value=50, marks={i: str(i) for i in range(0, 101, 10)}),
     dcc.Graph(id='forecast-bar-plot', className='dcc-graph'),
+    html.H3('Select number of countries:'),
     dcc.Slider(id='num-forecasted-countries', min=10, max=160, step=10, value=10, marks={i: str(i) for i in range(10, 160, 10)}),
     dcc.Graph(id='forecast-world-map', className='dcc-graph'),
     html.H2('Select Country Forecasts'),
@@ -111,6 +115,7 @@ forecasting_layout = html.Div([
     dcc.Dropdown(id='crisis-type', options=crisis_type_options, value='probability of mild crisis (%)', clearable=False, className='dcc-dropdown'),
     dcc.Graph(id='crisis-world-map', className='dcc-graph'),
 ])
+
 
 # Main layout
 app.layout = html.Div([
@@ -256,7 +261,7 @@ def update_crisis_map(selected_week, crisis_type):
     crisis_data = load_crisis_data(default_forecast_date)
     filtered_data = crisis_data[crisis_data['end of the week'] == selected_week]
     world_map_fig = px.choropleth(filtered_data, locations="iso3", color=crisis_type, hover_name="country", projection="natural earth", color_continuous_scale=px.colors.sequential.Mint, template='plotly_dark')
-    world_map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0))
+    world_map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0), title='')
     return world_map_fig
 
 # Start the app

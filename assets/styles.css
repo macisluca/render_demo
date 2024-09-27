@@ -36,6 +36,12 @@ h2 {
     margin-top: 20px;
 }
 
+h3 {
+    text-align: left;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
 .dcc-dropdown > .Select-control {
     width:100% !important;
     border: 2px solid rgb(50, 50, 50);
