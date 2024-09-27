@@ -33,38 +33,23 @@ h2 {
     text-align: left;
     font-size: 24px;
     margin-bottom: 15px;
-}
-
-.dcc-dropdown .Select-value-label#react-select-2--value-item { /* Variable */
-    color: rgb(235, 235, 235);  /* Change this to your desired color */
-}
-
-.dcc-dropdown .Select-value-label#react-select-3--value-item { /* Date */
-    color: rgb(235, 235, 235);  /* Change this to your desired color */
-}
-
-.dcc-dropdown .Select-value-label#react-select-4--value-item { /* Date */
-    color: rgb(235, 235, 235);  /* Change this to your desired color */
-}
-
-.dcc-dropdown .Select-value-label#react-select-6--value-item { /* Date */
-    color: rgb(235, 235, 235);  /* Change this to your desired color */
+    margin-top: 20px;
 }
 
 .dcc-dropdown > .Select-control {
     width:100% !important;
-    border: 2px solid rgb(30, 30, 30);
+    border: 2px solid rgb(50, 50, 50);
     border-radius:20px;
-    background-color: rgb(50, 50, 50);
+    background-color: rgb(140, 140, 140);
  }
 
  /* Menu list options */
 .dcc-dropdown > [class*="menu"] {
-    background-color: rgb(50, 50, 50);
-    color: whitesmoke;
+    background-color: rgb(140, 140, 140);
+    color: rgb(0, 0, 0);
 }
 
 /* Single selected value */
 .dcc-dropdown [class*="singleValue"] {
-    color: white;
+    color: rgb(0, 0, 0);
 }
