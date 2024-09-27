@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+MYT,Mayotte,2024-09-14,1.0,2.5,9.3,2024-09-20
+MYT,Mayotte,2024-09-21,0.8,2.2,8.9,2024-09-27
+MYT,Mayotte,2024-09-28,0.7,2.0,8.7,2024-10-04
+MYT,Mayotte,2024-10-05,0.2,1.1,8.3,2024-10-11
+MYT,Mayotte,2024-10-12,0.1,1.0,8.8,2024-10-18
+MYT,Mayotte,2024-10-19,0.4,2.3,8.7,2024-10-25
+MYT,Mayotte,2024-10-26,0.6,1.9,7.5,2024-11-01
+MYT,Mayotte,2024-11-02,0.6,1.9,8.6,2024-11-08
+MYT,Mayotte,2024-11-09,1.0,2.6,9.3,2024-11-15
+MYT,Mayotte,2024-11-16,0.4,2.1,9.5,2024-11-22
+MYT,Mayotte,2024-11-23,0.6,3.0,9.8,2024-11-29
+MYT,Mayotte,2024-11-30,1.0,3.0,11.0,2024-12-06

@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+FIN,Finland,2024-09-21,0.0,0.1,5.0,2024-09-27
+FIN,Finland,2024-09-28,0.1,0.4,5.5,2024-10-04
+FIN,Finland,2024-10-05,0.1,0.2,3.7,2024-10-11
+FIN,Finland,2024-10-12,0.0,0.1,3.9,2024-10-18
+FIN,Finland,2024-10-19,0.0,0.0,3.6,2024-10-25
+FIN,Finland,2024-10-26,0.0,0.1,2.6,2024-11-01
+FIN,Finland,2024-11-02,0.0,0.3,4.2,2024-11-08
+FIN,Finland,2024-11-09,0.0,0.3,3.4,2024-11-15
+FIN,Finland,2024-11-16,0.1,0.2,3.5,2024-11-22
+FIN,Finland,2024-11-23,0.0,0.1,4.5,2024-11-29
+FIN,Finland,2024-11-30,0.1,0.1,5.1,2024-12-06
+FIN,Finland,2024-12-07,0.0,0.0,4.6,2024-12-13

@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+MEX,Mexico,2024-09-21,0.0,0.8,6.9,2024-09-27
+MEX,Mexico,2024-09-28,0.3,2.3,10.4,2024-10-04
+MEX,Mexico,2024-10-05,0.3,1.7,6.6,2024-10-11
+MEX,Mexico,2024-10-12,0.1,1.0,7.9,2024-10-18
+MEX,Mexico,2024-10-19,0.1,2.9,11.3,2024-10-25
+MEX,Mexico,2024-10-26,0.2,2.4,9.7,2024-11-01
+MEX,Mexico,2024-11-02,0.2,1.2,7.7,2024-11-08
+MEX,Mexico,2024-11-09,0.2,1.4,7.3,2024-11-15
+MEX,Mexico,2024-11-16,0.0,0.7,8.0,2024-11-22
+MEX,Mexico,2024-11-23,0.2,2.3,10.1,2024-11-29
+MEX,Mexico,2024-11-30,0.3,1.9,10.7,2024-12-06
+MEX,Mexico,2024-12-07,0.0,1.2,9.1,2024-12-13

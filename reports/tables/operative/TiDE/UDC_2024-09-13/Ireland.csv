@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+IRL,Ireland,2024-09-14,0.0,0.6,5.5,2024-09-20
+IRL,Ireland,2024-09-21,0.0,0.4,6.0,2024-09-27
+IRL,Ireland,2024-09-28,0.1,1.8,10.0,2024-10-04
+IRL,Ireland,2024-10-05,0.3,1.1,5.7,2024-10-11
+IRL,Ireland,2024-10-12,0.0,0.3,5.3,2024-10-18
+IRL,Ireland,2024-10-19,0.0,0.4,3.6,2024-10-25
+IRL,Ireland,2024-10-26,0.0,0.1,4.8,2024-11-01
+IRL,Ireland,2024-11-02,0.0,1.4,7.7,2024-11-08
+IRL,Ireland,2024-11-09,0.0,1.2,7.7,2024-11-15
+IRL,Ireland,2024-11-16,0.2,0.8,7.8,2024-11-22
+IRL,Ireland,2024-11-23,0.4,1.2,7.3,2024-11-29
+IRL,Ireland,2024-11-30,0.1,0.4,4.6,2024-12-06

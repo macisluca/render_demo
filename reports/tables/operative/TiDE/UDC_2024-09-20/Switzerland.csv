@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+CHE,Switzerland,2024-09-21,0.1,1.2,2.0,2024-09-27
+CHE,Switzerland,2024-09-28,0.2,0.9,1.7,2024-10-04
+CHE,Switzerland,2024-10-05,0.3,1.5,2.2,2024-10-11
+CHE,Switzerland,2024-10-12,0.1,1.1,2.1,2024-10-18
+CHE,Switzerland,2024-10-19,0.9,2.8,4.2,2024-10-25
+CHE,Switzerland,2024-10-26,0.5,1.5,3.0,2024-11-01
+CHE,Switzerland,2024-11-02,0.0,0.8,1.3,2024-11-08
+CHE,Switzerland,2024-11-09,0.5,2.1,3.0,2024-11-15
+CHE,Switzerland,2024-11-16,0.1,0.8,1.8,2024-11-22
+CHE,Switzerland,2024-11-23,0.1,0.8,1.8,2024-11-29
+CHE,Switzerland,2024-11-30,0.4,1.6,2.6,2024-12-06
+CHE,Switzerland,2024-12-07,0.3,1.4,2.1,2024-12-13

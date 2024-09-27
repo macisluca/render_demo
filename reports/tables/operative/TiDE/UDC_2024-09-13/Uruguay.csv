@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+URY,Uruguay,2024-09-14,0.9,1.3,6.4,2024-09-20
+URY,Uruguay,2024-09-21,0.8,1.4,6.2,2024-09-27
+URY,Uruguay,2024-09-28,0.5,1.1,6.7,2024-10-04
+URY,Uruguay,2024-10-05,0.4,0.8,6.7,2024-10-11
+URY,Uruguay,2024-10-12,0.5,1.2,7.3,2024-10-18
+URY,Uruguay,2024-10-19,0.8,1.3,6.4,2024-10-25
+URY,Uruguay,2024-10-26,1.0,2.5,8.3,2024-11-01
+URY,Uruguay,2024-11-02,0.4,0.4,4.9,2024-11-08
+URY,Uruguay,2024-11-09,0.7,0.9,5.9,2024-11-15
+URY,Uruguay,2024-11-16,0.2,0.9,5.3,2024-11-22
+URY,Uruguay,2024-11-23,1.4,2.1,10.5,2024-11-29
+URY,Uruguay,2024-11-30,0.3,0.5,5.0,2024-12-06
