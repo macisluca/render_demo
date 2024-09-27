@@ -87,6 +87,7 @@ monitoring_layout = html.Div([
         dcc.Dropdown(id='evolution-column', options=column_options, value='violence index', clearable=False, className='dcc-dropdown'),
         dcc.Dropdown(id='evolution-country', options=[{'label': c, 'value': c} for c in sorted(data['country'].unique())], value=['Afghanistan'], multi=True, clearable=False, className='dcc-dropdown'),
         dcc.Graph(id='line-plot', className='dcc-graph'),
+        dcc.Dropdown(id='plot-date', options=[{'label': date, 'value': date} for date in available_dates], value=default_date, clearable=False, className='dcc-dropdown'),
         dash_table.DataTable(id='data-table',
             style_data={'color': 'white','backgroundColor': 'rgb(50, 50, 50)'},
             style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white', 'fontWeight': 'bold'},
@@ -115,7 +116,6 @@ forecasting_layout = html.Div([
     dcc.Dropdown(id='crisis-type', options=crisis_type_options, value='probability of mild crisis (%)', clearable=False, className='dcc-dropdown'),
     dcc.Graph(id='crisis-world-map', className='dcc-graph'),
 ])
-
 
 # Main layout
 app.layout = html.Div([
@@ -178,10 +178,11 @@ def update_bar_and_map(selected_column, selected_date, num_countries):
      Output('data-table', 'data'),
      Output('data-table', 'columns')],
     [Input('evolution-column', 'value'),
-     Input('evolution-country', 'value')]
+     Input('evolution-country', 'value'),
+     Input('plot-date', 'value')]
 )
 
-def update_line_plot_and_table(selected_column, selected_countries):
+def update_line_plot_and_table(selected_column, selected_countries, plot_date):
     # Create an empty DataFrame to collect data for selected countries
     combined_data = pd.DataFrame()
     
@@ -195,11 +196,23 @@ def update_line_plot_and_table(selected_column, selected_countries):
     line_fig = px.line(combined_data, x='event_date', y=selected_column, color='country', template='plotly_dark',
                   title=f'{selected_column} over time for {", ".join(selected_countries)}')
     
+    # Add circle markers for each country at the plot_date
+    for country in selected_countries:
+        country_data = combined_data[combined_data['country'] == country]
+        
+        # Find the y-value (selected_column value) at the plot_date
+        y_value = country_data.loc[country_data['event_date'] == plot_date, selected_column].values[0]
+        
+        # Add a scatter trace for the marker at the specific point
+        line_fig.add_scatter(x=[plot_date], y=[y_value], mode='markers',
+                             marker=dict(color='white', size=10, symbol='circle'),
+                             name=f'{country} date')
+    
     # Prepare the table data for the selected countries
     table_data = []
     for country in selected_countries:
         country_data = combined_data[combined_data['country'] == country]
-        latest_values = country_data.loc[country_data['event_date'] == default_date].to_dict('records')[0]
+        latest_values = country_data.loc[country_data['event_date'] == plot_date].to_dict('records')[0]
         table_data.append(latest_values)
 
     new_table_data = []
@@ -261,7 +274,7 @@ def update_crisis_map(selected_week, crisis_type):
     crisis_data = load_crisis_data(default_forecast_date)
     filtered_data = crisis_data[crisis_data['end of the week'] == selected_week]
     world_map_fig = px.choropleth(filtered_data, locations="iso3", color=crisis_type, hover_name="country", projection="natural earth", color_continuous_scale=px.colors.sequential.Mint, template='plotly_dark')
-    world_map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0), title='')
+    world_map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0))
     return world_map_fig
 
 # Start the app
