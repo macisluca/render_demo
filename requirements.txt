@@ -3,4 +3,7 @@ dash_bootstrap_components
 plotly
 pandas
 dash_table
+numpy
+re
+datetime
 gunicorn
