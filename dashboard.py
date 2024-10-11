@@ -5,6 +5,9 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 import os
+import numpy as np
+import re
+from datetime import datetime, timedelta
 
 # Initialize the Dash app with a Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
@@ -50,7 +53,7 @@ crisis_data = load_crisis_data(default_forecast_date)
 
 # Column dropdown options
 unavailable_cols = ['event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'month', 'quarter', 'week']
-unavailable_table_cols = ['country', 'month', 'quarter', 'week']
+unavailable_table_cols = ['country', 'month', 'quarter', 'week', 'event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon']
 column_options = [{'label': col, 'value': col} for col in data.columns if col not in unavailable_cols]
 
 # Crisis type dropdown options
@@ -72,26 +75,62 @@ navbar = dbc.NavbarSimple(
     dark=True,
 )
 
+# Event Raw Data
+event_data = pd.read_csv('data/last_month_acled.csv')
+available_event_dates = sorted(event_data['event_date'].unique())
+default_event_date = available_event_dates[-1]
+
+def transform_date_to_day_first(date_input):
+    """
+    Transforms a date input into the format DD/MM/YYYY.
+    
+    :param date_input: A date string or datetime object.
+    :return: A string representing the date in DD/MM/YYYY format.
+    """
+    # If the input is a string, convert it to a datetime object
+    if isinstance(date_input, str):
+        try:
+            # Attempt to parse the string in a common format (e.g., YYYY-MM-DD)
+            date_obj = datetime.strptime(date_input, "%Y-%m-%d")
+        except ValueError:
+            return "Invalid date format. Please use YYYY-MM-DD format."
+    elif isinstance(date_input, datetime):
+        date_obj = date_input
+    else:
+        return "Invalid input. Please provide a string or datetime object."
+
+    # Return the date formatted as DD/MM/YYYY
+    return date_obj.strftime("%d/%m/%Y")
+
 # Monitoring layout
 monitoring_layout = html.Div([
     html.H1('Monitoring Dashboard'),
     html.Div(className='container', children=[
-        html.H2('Ranking by Variable and Date'),
+        html.H2('Global Daily Events Map'),
+        html.H3('Select a date, and the map will display the events that occurred on that day.'),
+        dcc.Dropdown(id='map-date', options=[{'label': transform_date_to_day_first(date), 'value': date} for date in available_event_dates], value=default_event_date, clearable=False, className='dcc-dropdown'),
+        dcc.Graph(id='event-map', className='dcc-graph'),
+        html.H2('Ranking by Variable on a weekly basis'),
         dcc.Dropdown(id='ranking-column', options=column_options, value='violence index', clearable=False, className='dcc-dropdown'),
-        dcc.Dropdown(id='ranking-date', options=[{'label': date, 'value': date} for date in available_dates], value=default_date, clearable=False, className='dcc-dropdown'),
+        dcc.Dropdown(id='ranking-date', options=[{'label': transform_date_to_day_first(date), 'value': date} for date in available_dates], value=default_date, clearable=False, className='dcc-dropdown'),
         dcc.Graph(id='bar-plot', className='dcc-graph'),
         html.H3('Select number of countries:'),
         dcc.Slider(id='num-countries', min=10, max=235, step=10, value=10, marks={i: str(i) for i in range(10, 236, 10)}),
         dcc.Graph(id='world-map', className='dcc-graph'),
-        html.H2('Countries Stats Over Time'),
+        html.H2('Countries Weekly Stats Over Time'),
         dcc.Dropdown(id='evolution-column', options=column_options, value='violence index', clearable=False, className='dcc-dropdown'),
         dcc.Dropdown(id='evolution-country', options=[{'label': c, 'value': c} for c in sorted(data['country'].unique())], value=['Afghanistan'], multi=True, clearable=False, className='dcc-dropdown'),
         dcc.Graph(id='line-plot', className='dcc-graph'),
-        dcc.Dropdown(id='plot-date', options=[{'label': date, 'value': date} for date in available_dates], value=default_date, clearable=False, className='dcc-dropdown'),
+        dcc.Dropdown(id='plot-date', options=[{'label': transform_date_to_day_first(date), 'value': date} for date in available_dates], value=default_date, clearable=False, className='dcc-dropdown'),
         dash_table.DataTable(id='data-table',
             style_data={'color': 'white','backgroundColor': 'rgb(50, 50, 50)'},
             style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white', 'fontWeight': 'bold'},
-            style_cell={'height': 'auto', 'minWidth': '90px', 'width': '180px', 'maxWidth': '180px', 'whiteSpace': 'normal'}
+            style_cell={'textAlign': 'left', 'height': 'auto', 'minWidth': '90px', 'width': '180px', 'maxWidth': '180px', 'whiteSpace': 'normal'},
+            # Add conditional styling for rows with "violence index"
+            style_data_conditional=[
+                {'if': {'filter_query': '{Country} contains "index"'},
+                 'color':'rgb(255, 200, 200)','backgroundColor': 'rgb(60, 50, 50)'}
+                 ]
         ),
     ]),
 ])
@@ -99,7 +138,8 @@ monitoring_layout = html.Div([
 # Forecasting layout
 forecasting_layout = html.Div([
     html.H1('Forecasting Dashboard'),
-    dcc.Dropdown(id='forecast-date', options=[{'label': date, 'value': date} for date in available_forecast_dates], value=default_forecast_date, clearable=False, className='dcc-dropdown'),
+    html.H2('Forecasting of most violent countries'),
+    dcc.Dropdown(id='forecast-date', options=[{'label': transform_date_to_day_first(date), 'value': date} for date in available_forecast_dates], value=default_forecast_date, clearable=False, className='dcc-dropdown'),
     html.H3('Select forecasted week:'),
     dcc.Slider(id='forecast-slider', min=0, max=11, step=1, value=0, marks={i: f'Forecast {i+1}' for i in range(12)}),
     html.H3('Select outcome level:'),
@@ -108,11 +148,12 @@ forecasting_layout = html.Div([
     html.H3('Select number of countries:'),
     dcc.Slider(id='num-forecasted-countries', min=10, max=160, step=10, value=10, marks={i: str(i) for i in range(10, 160, 10)}),
     dcc.Graph(id='forecast-world-map', className='dcc-graph'),
-    html.H2('Select Country Forecasts'),
+    html.H2('Select Country Violence Forecasts'),
     dcc.Dropdown(id='forecast-country', options=[{'label': c, 'value': c} for c in sorted(data['country'].unique())], value='Afghanistan', clearable=False, className='dcc-dropdown'),
     html.Iframe(id='forecast-line-plot', style={'width': '100%', 'height': '600px'}),
     html.H2('Crisis Map'),
-    dcc.Dropdown(id='crisis-end-week', options=[{'label': week, 'value': week} for week in sorted(crisis_data['end of the week'].unique())], value='2024-09-27', clearable=False, className='dcc-dropdown'),
+    html.H3('The Crisis Map illustrates the likelihood of each country approaching its historical peak of violence, based on past trends and predictive analysis.'),
+    dcc.Dropdown(id='crisis-end-week', options=[{'label': transform_date_to_day_first(week), 'value': week} for week in sorted(crisis_data['end of the week'].unique())], value='2024-09-27', clearable=False, className='dcc-dropdown'),
     dcc.Dropdown(id='crisis-type', options=crisis_type_options, value='probability of mild crisis (%)', clearable=False, className='dcc-dropdown'),
     dcc.Graph(id='crisis-world-map', className='dcc-graph'),
 ])
@@ -133,6 +174,61 @@ def display_page(pathname):
         return monitoring_layout  # Default to monitoring
 
 
+# Callback for event map
+@app.callback(
+    [Output('event-map', 'figure')],  # Expecting a list or tuple of outputs
+    [Input('map-date', 'value')]
+)
+
+def update_event_map(selected_date):
+    # Filter data for the selected date
+    filtered_df = event_data[event_data['event_date'] == selected_date]
+
+    # Group by latitude, longitude, and event_type
+    grouped = filtered_df.groupby(['latitude', 'longitude', 'event_type']).agg(
+        numerosity=('event_type', 'size'),  # Count the number of events in the group
+        fatalities=('fatalities', 'sum'),  # Sum the fatalities for each group
+        actors=('actor1', lambda x: ', '.join(sorted(set(x)))),  # Concatenate unique actor1 values
+        #admin1=('admin1', lambda x: ', '.join(sorted(set(x)))),  # Concatenate unique admin1 values
+        #admin2=('admin2', lambda x: ', '.join(sorted(set(x)))),  # Concatenate unique admin2 values
+        events=('sub_event_type', lambda x: ', '.join(sorted(set(x)))),   # Concatenate unique sub_event_type values
+        description=('notes', lambda x: '/'.join(sorted(set(x)))),   # Concatenate unique notes values
+    ).reset_index()
+
+    # Apply the function to the 'description' column
+    grouped['description'] = grouped['description'].apply(add_br_to_description)
+
+    # Generate map with Plotly Express
+    fig = px.scatter_mapbox(grouped,
+                            lat='latitude',
+                            lon='longitude',
+                            size='numerosity',  # Circle size based on count
+                            color='event_type',  # Color based on event_type
+                            hover_name='event_type',
+                            hover_data={'actors': True, 'events': True, 'numerosity': True, 'fatalities':True, 'description':True, 'event_type': False, 'latitude': False, 'longitude': False},
+                            zoom=1.5,
+                            opacity=0.5,
+                            template='plotly_dark')
+
+    # Update map style
+    fig.update_layout(mapbox_style="carto-positron")
+
+    return [fig]
+
+def add_br_to_description(description):
+    # First, add <br><br> after every `/`
+    description_with_slashes = description.replace('/', '<br><br>')
+    
+    # Insert <br> at the first space after every 50 characters
+    def insert_br_at_space(text, limit):
+        pattern = r'(.{'+str(limit)+r'}\S*)\s'  # Match at least 'limit' characters, followed by a space
+        return re.sub(pattern, r'\1<br> ', text)  # Replace the match with the text and insert <br> before the space
+
+    # Apply the function, inserting <br> after 50 characters
+    description_with_breaks = insert_br_at_space(description_with_slashes, 50)
+
+    return description_with_breaks
+
 # Callback for bar plot and world map
 @app.callback(
     [Output('bar-plot', 'figure'),
@@ -145,14 +241,17 @@ def display_page(pathname):
 def update_bar_and_map(selected_column, selected_date, num_countries):
     # Filter the data for the selected date
     filtered_data = data[data['event_date'] == selected_date]
-    
     # Sort countries by the selected column
     sorted_data = filtered_data.sort_values(by=selected_column, ascending=False).head(num_countries)
-    
+    # Convert string to date
+    date_obj = datetime.strptime(selected_date, "%Y-%m-%d")
+    # Subtract 6 days
+    six_days_before = date_obj - timedelta(days=6)
+    six_days_before_str = six_days_before.strftime("%Y-%m-%d")
     # Create the bar plot
     bar_fig = px.bar(sorted_data, x='country', y=selected_column, template='plotly_dark',
                      color=selected_column, color_continuous_scale='mint',
-                 title=f'Top {num_countries} countries by {selected_column} on {selected_date}')
+                 title=f'Top {num_countries} countries by {selected_column} from {transform_date_to_day_first(six_days_before_str)} to {transform_date_to_day_first(selected_date)}')
     
     # Create the world map
     map_fig = px.choropleth(
@@ -219,10 +318,22 @@ def update_line_plot_and_table(selected_column, selected_countries, plot_date):
     for col in combined_data.columns:
         if col in unavailable_table_cols:
             continue
-        new_row = {'Country': col}
+        string_col = col.replace("_", ": ")
+        string_col = string_col.replace("/", ", ")
+        string_col = 'Violence index 1 Year moving average' if col == 'violence index_moving_avg' else string_col
+        new_row = {'Country': string_col}
         for i, country in enumerate(selected_countries):
             new_row[country] = table_data[i][col]
-        new_table_data.append(new_row)
+            if isinstance(table_data[i][col], float):
+                new_row[country] = np.round(table_data[i][col],0)
+        # Append value if is not 0 in 1 of the countries
+        for i, country in enumerate(selected_countries):
+            append_value = False
+            if table_data[i][col] not in [0, '0']:
+                append_value = True
+            if append_value:
+                new_table_data.append(new_row)
+
     
     columns_default = [{'name':'Country', 'id':'Country'}]
     columns = [{'name':country, 'id':country} for country in selected_countries]
