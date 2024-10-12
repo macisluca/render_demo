@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+SEN,Senegal,2024-10-05,0.1,3.2,15.2,2024-10-11
+SEN,Senegal,2024-10-12,0.0,2.8,14.5,2024-10-18
+SEN,Senegal,2024-10-19,0.2,3.9,14.1,2024-10-25
+SEN,Senegal,2024-10-26,0.0,4.5,15.4,2024-11-01
+SEN,Senegal,2024-11-02,0.0,3.2,17.0,2024-11-08
+SEN,Senegal,2024-11-09,0.2,3.4,15.0,2024-11-15
+SEN,Senegal,2024-11-16,0.3,3.4,13.2,2024-11-22
+SEN,Senegal,2024-11-23,0.0,2.1,13.1,2024-11-29
+SEN,Senegal,2024-11-30,0.2,3.7,14.9,2024-12-06
+SEN,Senegal,2024-12-07,0.2,3.9,15.8,2024-12-13
+SEN,Senegal,2024-12-14,0.1,2.3,12.7,2024-12-20
+SEN,Senegal,2024-12-21,0.1,5.4,16.2,2024-12-27

@@ -39,6 +39,30 @@ def load_crisis_data(date):
     dfs = [pd.read_csv(os.path.join(CRISIS_REPORT_PATH, file)) for file in files]
     return pd.concat(dfs, ignore_index=True)
 
+# Helper function to transform dates into format DD/MM/YYYY
+def transform_date_to_day_first(date_input):
+    """
+    Transforms a date input into the format DD/MM/YYYY.
+    
+    :param date_input: A date string or datetime object.
+    :return: A string representing the date in DD/MM/YYYY format.
+    """
+    # If the input is a string, convert it to a datetime object
+    if isinstance(date_input, str):
+        try:
+            # Attempt to parse the string in a common format (e.g., YYYY-MM-DD)
+            date_obj = datetime.strptime(date_input, "%Y-%m-%d")
+        except ValueError:
+            return "Invalid date format. Please use YYYY-MM-DD format."
+    elif isinstance(date_input, datetime):
+        date_obj = date_input
+    else:
+        return "Invalid input. Please provide a string or datetime object."
+
+    # Return the date formatted as DD/MM/YYYY
+    return date_obj.strftime("%d/%m/%Y")
+
+
 # Load initial data
 data = load_all_data()
 
@@ -50,6 +74,7 @@ default_forecast_date = available_forecast_dates[0]
 
 # Load initial crisis data
 crisis_data = load_crisis_data(default_forecast_date)
+crisis_weeks = list(sorted(crisis_data['end of the week'].unique()))
 
 # Column dropdown options
 unavailable_cols = ['event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'month', 'quarter', 'week']
@@ -79,28 +104,6 @@ navbar = dbc.NavbarSimple(
 event_data = pd.read_csv('data/last_month_acled.csv')
 available_event_dates = sorted(event_data['event_date'].unique())
 default_event_date = available_event_dates[-1]
-
-def transform_date_to_day_first(date_input):
-    """
-    Transforms a date input into the format DD/MM/YYYY.
-    
-    :param date_input: A date string or datetime object.
-    :return: A string representing the date in DD/MM/YYYY format.
-    """
-    # If the input is a string, convert it to a datetime object
-    if isinstance(date_input, str):
-        try:
-            # Attempt to parse the string in a common format (e.g., YYYY-MM-DD)
-            date_obj = datetime.strptime(date_input, "%Y-%m-%d")
-        except ValueError:
-            return "Invalid date format. Please use YYYY-MM-DD format."
-    elif isinstance(date_input, datetime):
-        date_obj = date_input
-    else:
-        return "Invalid input. Please provide a string or datetime object."
-
-    # Return the date formatted as DD/MM/YYYY
-    return date_obj.strftime("%d/%m/%Y")
 
 # Monitoring layout
 monitoring_layout = html.Div([
@@ -153,7 +156,7 @@ forecasting_layout = html.Div([
     html.Iframe(id='forecast-line-plot', style={'width': '100%', 'height': '600px'}),
     html.H2('Crisis Map'),
     html.H3('The Crisis Map illustrates the likelihood of each country approaching its historical peak of violence, based on past trends and predictive analysis.'),
-    dcc.Dropdown(id='crisis-end-week', options=[{'label': transform_date_to_day_first(week), 'value': week} for week in sorted(crisis_data['end of the week'].unique())], value='2024-09-27', clearable=False, className='dcc-dropdown'),
+    dcc.Dropdown(id='crisis-end-week', options=[{'label': transform_date_to_day_first(week), 'value': week} for week in crisis_weeks], value=crisis_weeks[0], clearable=False, className='dcc-dropdown'),
     dcc.Dropdown(id='crisis-type', options=crisis_type_options, value='probability of mild crisis (%)', clearable=False, className='dcc-dropdown'),
     dcc.Graph(id='crisis-world-map', className='dcc-graph'),
 ])

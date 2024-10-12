@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+MAR,Morocco,2024-10-05,0.5,12.2,49.3,2024-10-11
+MAR,Morocco,2024-10-12,0.2,13.4,47.3,2024-10-18
+MAR,Morocco,2024-10-19,0.0,9.4,39.1,2024-10-25
+MAR,Morocco,2024-10-26,0.1,7.2,35.6,2024-11-01
+MAR,Morocco,2024-11-02,0.1,9.3,40.4,2024-11-08
+MAR,Morocco,2024-11-09,0.0,9.0,36.7,2024-11-15
+MAR,Morocco,2024-11-16,0.1,7.6,36.5,2024-11-22
+MAR,Morocco,2024-11-23,0.2,10.2,43.2,2024-11-29
+MAR,Morocco,2024-11-30,0.1,9.1,40.9,2024-12-06
+MAR,Morocco,2024-12-07,0.0,6.0,33.8,2024-12-13
+MAR,Morocco,2024-12-14,0.1,6.9,34.9,2024-12-20
+MAR,Morocco,2024-12-21,0.1,11.0,41.6,2024-12-27

@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+LBN,Lebanon,2024-10-05,0.0,46.8,83.3,2024-10-11
+LBN,Lebanon,2024-10-12,0.0,42.5,79.7,2024-10-18
+LBN,Lebanon,2024-10-19,0.0,51.3,84.0,2024-10-25
+LBN,Lebanon,2024-10-26,0.0,41.1,81.9,2024-11-01
+LBN,Lebanon,2024-11-02,0.0,43.6,79.4,2024-11-08
+LBN,Lebanon,2024-11-09,0.0,35.4,76.8,2024-11-15
+LBN,Lebanon,2024-11-16,0.0,62.7,88.1,2024-11-22
+LBN,Lebanon,2024-11-23,0.0,48.5,80.4,2024-11-29
+LBN,Lebanon,2024-11-30,0.1,45.1,81.8,2024-12-06
+LBN,Lebanon,2024-12-07,0.0,57.3,86.9,2024-12-13
+LBN,Lebanon,2024-12-14,0.0,42.1,81.6,2024-12-20
+LBN,Lebanon,2024-12-21,0.0,43.1,80.5,2024-12-27

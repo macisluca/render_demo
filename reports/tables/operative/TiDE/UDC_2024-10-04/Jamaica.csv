@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+JAM,Jamaica,2024-10-05,0.0,0.6,4.8,2024-10-11
+JAM,Jamaica,2024-10-12,0.0,0.6,4.7,2024-10-18
+JAM,Jamaica,2024-10-19,0.2,0.7,6.1,2024-10-25
+JAM,Jamaica,2024-10-26,0.1,1.1,6.1,2024-11-01
+JAM,Jamaica,2024-11-02,0.1,1.2,7.4,2024-11-08
+JAM,Jamaica,2024-11-09,0.1,1.0,5.4,2024-11-15
+JAM,Jamaica,2024-11-16,0.2,1.7,7.5,2024-11-22
+JAM,Jamaica,2024-11-23,0.4,1.3,7.7,2024-11-29
+JAM,Jamaica,2024-11-30,0.0,1.1,7.1,2024-12-06
+JAM,Jamaica,2024-12-07,0.0,1.0,5.5,2024-12-13
+JAM,Jamaica,2024-12-14,0.1,1.9,6.9,2024-12-20
+JAM,Jamaica,2024-12-21,0.0,1.1,6.5,2024-12-27

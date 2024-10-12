@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+SAU,Saudi Arabia,2024-10-05,0.1,0.1,0.6,2024-10-11
+SAU,Saudi Arabia,2024-10-12,0.1,0.1,0.4,2024-10-18
+SAU,Saudi Arabia,2024-10-19,0.1,0.1,0.5,2024-10-25
+SAU,Saudi Arabia,2024-10-26,0.1,0.2,1.0,2024-11-01
+SAU,Saudi Arabia,2024-11-02,0.1,0.2,0.6,2024-11-08
+SAU,Saudi Arabia,2024-11-09,0.0,0.0,0.2,2024-11-15
+SAU,Saudi Arabia,2024-11-16,0.4,0.4,0.6,2024-11-22
+SAU,Saudi Arabia,2024-11-23,0.2,0.2,0.8,2024-11-29
+SAU,Saudi Arabia,2024-11-30,0.1,0.1,0.7,2024-12-06
+SAU,Saudi Arabia,2024-12-07,0.0,0.1,0.6,2024-12-13
+SAU,Saudi Arabia,2024-12-14,0.1,0.1,0.4,2024-12-20
+SAU,Saudi Arabia,2024-12-21,0.1,0.2,0.5,2024-12-27
