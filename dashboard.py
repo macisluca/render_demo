@@ -77,8 +77,8 @@ crisis_data = load_crisis_data(default_forecast_date)
 crisis_weeks = list(sorted(crisis_data['end of the week'].unique()))
 
 # Column dropdown options
-unavailable_cols = ['event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'month', 'quarter', 'week', 'violence index_exp_moving_avg']
-unavailable_table_cols = ['country', 'month', 'quarter', 'week', 'event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'violence index_exp_moving_avg']
+unavailable_cols = ['event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'month', 'quarter', 'week', 'violence index_exp_moving_avg', 'General', 'Legislative', 'Local', 'Parliamentary', 'Presidential', 'Referendum', 'holiday']
+unavailable_table_cols = ['country', 'month', 'quarter', 'week', 'event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'violence index_exp_moving_avg', 'General', 'Legislative', 'Local', 'Parliamentary', 'Presidential', 'Referendum', 'holiday']
 column_options = [{'label': col, 'value': col} for col in data.columns if col not in unavailable_cols]
 
 # Crisis type dropdown options
