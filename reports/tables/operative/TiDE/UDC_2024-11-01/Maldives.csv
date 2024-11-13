@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+MDV,Maldives,2024-11-02,0.2,1.7,6.7,2024-11-08
+MDV,Maldives,2024-11-09,0.2,2.4,8.8,2024-11-15
+MDV,Maldives,2024-11-16,0.1,1.6,8.0,2024-11-22
+MDV,Maldives,2024-11-23,0.3,2.1,7.1,2024-11-29
+MDV,Maldives,2024-11-30,0.6,2.7,9.2,2024-12-06
+MDV,Maldives,2024-12-07,0.1,2.5,8.6,2024-12-13
+MDV,Maldives,2024-12-14,0.5,2.6,9.3,2024-12-20
+MDV,Maldives,2024-12-21,0.4,1.6,6.6,2024-12-27
+MDV,Maldives,2024-12-28,0.1,1.2,7.0,2025-01-03
+MDV,Maldives,2025-01-04,0.8,3.7,10.9,2025-01-10
+MDV,Maldives,2025-01-11,0.5,2.5,10.1,2025-01-17
+MDV,Maldives,2025-01-18,0.2,1.9,9.0,2025-01-24

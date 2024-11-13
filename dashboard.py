@@ -77,8 +77,8 @@ crisis_data = load_crisis_data(default_forecast_date)
 crisis_weeks = list(sorted(crisis_data['end of the week'].unique()))
 
 # Column dropdown options
-unavailable_cols = ['event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'month', 'quarter', 'week']
-unavailable_table_cols = ['country', 'month', 'quarter', 'week', 'event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon']
+unavailable_cols = ['event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'month', 'quarter', 'week', 'violence index_exp_moving_avg']
+unavailable_table_cols = ['country', 'month', 'quarter', 'week', 'event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'violence index_exp_moving_avg']
 column_options = [{'label': col, 'value': col} for col in data.columns if col not in unavailable_cols]
 
 # Crisis type dropdown options
@@ -120,6 +120,7 @@ monitoring_layout = html.Div([
         html.H3('Select number of countries:'),
         dcc.Slider(id='num-countries', min=10, max=235, step=10, value=10, marks={i: str(i) for i in range(10, 236, 10)}),
         dcc.Graph(id='world-map', className='dcc-graph'),
+        html.H3("Data source: ACLED (www.acleddata.com). Accessed on November 13th, 2024."),
         html.H2('Countries Weekly Stats Over Time'),
         dcc.Dropdown(id='evolution-column', options=column_options, value='violence index', clearable=False, className='dcc-dropdown'),
         dcc.Dropdown(id='evolution-country', options=[{'label': c, 'value': c} for c in sorted(data['country'].unique())], value=['Afghanistan'], multi=True, clearable=False, className='dcc-dropdown'),
@@ -135,7 +136,18 @@ monitoring_layout = html.Div([
                  'color':'rgb(255, 200, 200)','backgroundColor': 'rgb(60, 50, 50)'}
                  ]
         ),
+        html.H3("Data source: ACLED (www.acleddata.com). Accessed on November 13th, 2024.")
     ]),
+    html.Footer(
+        [
+        "Data source: Armed Conflict Location & Event Data Project (ACLED); Accessed on November 13th, 2024. ",
+        "See ", html.A("www.acleddata.com", href="https://www.acleddata.com", target="_blank"), " for more information.",
+        html.Br(),
+        "Modifications from ACLED Data: Violence index calculated based on the paper ",
+        html.A("Violence Index: a new data-driven proposal to conflict monitoring", href="https://dx.doi.org/10.4995/CARMA2024.2024.17831", target="_blank"),
+        ],
+    style={'textAlign': 'center', 'fontSize': 'small', 'padding': '10px'}
+    ),
 ])
 
 # Forecasting layout
@@ -159,6 +171,16 @@ forecasting_layout = html.Div([
     dcc.Dropdown(id='crisis-end-week', options=[{'label': transform_date_to_day_first(week), 'value': week} for week in crisis_weeks], value=crisis_weeks[0], clearable=False, className='dcc-dropdown'),
     dcc.Dropdown(id='crisis-type', options=crisis_type_options, value='probability of mild crisis (%)', clearable=False, className='dcc-dropdown'),
     dcc.Graph(id='crisis-world-map', className='dcc-graph'),
+    html.Footer(
+        [
+        "Data source: Armed Conflict Location & Event Data Project (ACLED); Accessed on November 13th, 2024. ",
+        "See ", html.A("www.acleddata.com", href="https://www.acleddata.com", target="_blank"), " for more information.",
+        html.Br(),
+        "Modifications from ACLED Data: Violence index calculated based on the paper ",
+        html.A("Violence Index: a new data-driven proposal to conflict monitoring", href="https://dx.doi.org/10.4995/CARMA2024.2024.17831", target="_blank"),
+        ],
+    style={'textAlign': 'center', 'fontSize': 'small', 'padding': '10px'}
+    ),
 ])
 
 # Main layout
@@ -215,6 +237,14 @@ def update_event_map(selected_date):
 
     # Update map style
     fig.update_layout(mapbox_style="carto-positron")
+
+    # Add ACLED attribution annotation
+    fig.add_annotation(
+        text="Data source: ACLED; accessed November 13th, 2024. See www.acleddata.com for details.",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.1, showarrow=False,
+        font=dict(size=10, color="white")
+    )
 
     return [fig]
 

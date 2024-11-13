@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+AUT,Austria,2024-11-02,0.5,2.3,5.0,2024-11-08
+AUT,Austria,2024-11-09,0.3,3.4,7.1,2024-11-15
+AUT,Austria,2024-11-16,0.2,1.6,4.5,2024-11-22
+AUT,Austria,2024-11-23,0.3,1.4,4.6,2024-11-29
+AUT,Austria,2024-11-30,0.4,3.3,7.1,2024-12-06
+AUT,Austria,2024-12-07,0.2,2.4,5.8,2024-12-13
+AUT,Austria,2024-12-14,0.5,2.5,6.4,2024-12-20
+AUT,Austria,2024-12-21,0.1,1.5,4.8,2024-12-27
+AUT,Austria,2024-12-28,0.1,1.7,3.8,2025-01-03
+AUT,Austria,2025-01-04,0.0,2.3,5.2,2025-01-10
+AUT,Austria,2025-01-11,0.2,1.9,4.6,2025-01-17
+AUT,Austria,2025-01-18,0.0,2.6,5.7,2025-01-24

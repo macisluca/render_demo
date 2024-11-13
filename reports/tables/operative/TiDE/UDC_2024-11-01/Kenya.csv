@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+KEN,Kenya,2024-11-02,0.0,4.2,34.9,2024-11-08
+KEN,Kenya,2024-11-09,0.0,9.6,46.3,2024-11-15
+KEN,Kenya,2024-11-16,0.0,7.2,45.3,2024-11-22
+KEN,Kenya,2024-11-23,0.0,8.4,44.0,2024-11-29
+KEN,Kenya,2024-11-30,0.0,6.8,43.0,2024-12-06
+KEN,Kenya,2024-12-07,0.1,9.0,46.1,2024-12-13
+KEN,Kenya,2024-12-14,0.0,6.3,42.0,2024-12-20
+KEN,Kenya,2024-12-21,0.1,8.7,50.5,2024-12-27
+KEN,Kenya,2024-12-28,0.1,10.8,50.4,2025-01-03
+KEN,Kenya,2025-01-04,0.0,11.2,51.8,2025-01-10
+KEN,Kenya,2025-01-11,0.1,6.4,42.2,2025-01-17
+KEN,Kenya,2025-01-18,0.0,6.8,42.5,2025-01-24

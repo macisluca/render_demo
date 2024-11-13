@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+GEO,Georgia,2024-11-02,3.0,5.0,10.3,2024-11-08
+GEO,Georgia,2024-11-09,2.8,5.2,11.7,2024-11-15
+GEO,Georgia,2024-11-16,1.5,3.9,11.1,2024-11-22
+GEO,Georgia,2024-11-23,2.0,3.6,9.2,2024-11-29
+GEO,Georgia,2024-11-30,2.0,4.7,11.8,2024-12-06
+GEO,Georgia,2024-12-07,1.7,4.2,11.8,2024-12-13
+GEO,Georgia,2024-12-14,2.3,4.8,11.7,2024-12-20
+GEO,Georgia,2024-12-21,2.3,4.1,9.7,2024-12-27
+GEO,Georgia,2024-12-28,2.7,5.2,11.5,2025-01-03
+GEO,Georgia,2025-01-04,2.4,5.1,13.0,2025-01-10
+GEO,Georgia,2025-01-11,2.4,5.2,14.2,2025-01-17
+GEO,Georgia,2025-01-18,1.4,3.7,10.4,2025-01-24

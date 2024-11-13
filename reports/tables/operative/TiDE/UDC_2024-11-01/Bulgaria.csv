@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+BGR,Bulgaria,2024-11-02,0.5,2.7,12.2,2024-11-08
+BGR,Bulgaria,2024-11-09,0.4,2.3,14.5,2024-11-15
+BGR,Bulgaria,2024-11-16,0.4,1.5,10.9,2024-11-22
+BGR,Bulgaria,2024-11-23,0.3,1.0,12.0,2024-11-29
+BGR,Bulgaria,2024-11-30,0.2,1.6,13.3,2024-12-06
+BGR,Bulgaria,2024-12-07,0.5,1.2,13.1,2024-12-13
+BGR,Bulgaria,2024-12-14,0.4,1.4,12.3,2024-12-20
+BGR,Bulgaria,2024-12-21,0.6,2.0,11.5,2024-12-27
+BGR,Bulgaria,2024-12-28,1.1,2.2,14.5,2025-01-03
+BGR,Bulgaria,2025-01-04,0.4,2.3,13.7,2025-01-10
+BGR,Bulgaria,2025-01-11,0.3,1.5,12.5,2025-01-17
+BGR,Bulgaria,2025-01-18,0.9,3.4,14.8,2025-01-24
