@@ -283,7 +283,7 @@ def update_bar_and_map(selected_column, selected_date, num_countries):
     six_days_before_str = six_days_before.strftime("%Y-%m-%d")
     # Create the bar plot
     bar_fig = px.bar(sorted_data, x='country', y=selected_column, template='plotly_dark',
-                     color=selected_column, color_continuous_scale='mint',
+                     color=selected_column, color_continuous_scale='orrd',
                  title=f'Top {num_countries} countries by {selected_column} from {transform_date_to_day_first(six_days_before_str)} to {transform_date_to_day_first(selected_date)}')
     
     # Create the world map
@@ -293,7 +293,7 @@ def update_bar_and_map(selected_column, selected_date, num_countries):
         color=selected_column,
         hover_name="country",
         projection="natural earth",
-        color_continuous_scale=px.colors.sequential.Mint,
+        color_continuous_scale=px.colors.sequential.OrRd,
         title=selected_column + " by Country",
         template='plotly_dark'
     )
@@ -393,10 +393,10 @@ def update_forecasting_dashboard(selected_date, forecast_step, percentile, num_f
     outcome_percentiles = forecast_data.groupby('ISO_3')['outcome'].quantile(percentile / 100).reset_index()
     outcome_sorted_percentiles = outcome_percentiles.sort_values(by='outcome', ascending=False).head(num_forecasted_countries)
 
-    bar_fig = px.bar(outcome_sorted_percentiles, x='ISO_3', y='outcome', template='plotly_dark', color='outcome', color_continuous_scale='mint')
-    map_fig = px.choropleth(outcome_percentiles, locations="ISO_3", color="outcome", hover_name="ISO_3", projection="natural earth", color_continuous_scale=px.colors.sequential.Mint, template='plotly_dark')
-    map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0))
-
+    bar_fig = px.bar(outcome_sorted_percentiles, x='ISO_3', y='outcome', template='plotly_dark', color='outcome', color_continuous_scale='orrd')
+    map_fig = px.choropleth(outcome_percentiles, locations="ISO_3", color="outcome", hover_name="ISO_3", projection="natural earth", color_continuous_scale=px.colors.sequential.OrRd, template='plotly_dark')
+    map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0))#paper_bgcolor="#F6F5EC", plot_bgcolor="#F6F5EC"
+    #map_fig.update_geos(fitbounds='locations', visible=False, bgcolor='#F6F5EC')
     return bar_fig, map_fig
 
 
@@ -417,7 +417,7 @@ def update_forecast_line_plot(country):
 def update_crisis_map(selected_week, crisis_type):
     crisis_data = load_crisis_data(default_forecast_date)
     filtered_data = crisis_data[crisis_data['end of the week'] == selected_week]
-    world_map_fig = px.choropleth(filtered_data, locations="iso3", color=crisis_type, hover_name="country", projection="natural earth", color_continuous_scale=px.colors.sequential.Mint, template='plotly_dark')
+    world_map_fig = px.choropleth(filtered_data, locations="iso3", color=crisis_type, hover_name="country", projection="natural earth", color_continuous_scale=px.colors.sequential.OrRd, template='plotly_dark')
     world_map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0))
     return world_map_fig
 
