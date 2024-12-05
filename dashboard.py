@@ -76,6 +76,29 @@ default_forecast_date = available_forecast_dates[0]
 crisis_data = load_crisis_data(default_forecast_date)
 crisis_weeks = list(sorted(crisis_data['end of the week'].unique()))
 
+# Load the WDI dataframe and ACLED_coverage_ISO3 csv
+directory_wdi = "data/WDI/"
+# List all CSV files in the directory
+csv_files = [os.path.join(directory_wdi, file) for file in os.listdir(directory_wdi) if file.endswith('.csv')]
+# Concatenate all CSV files into a single DataFrame
+wdi_raw_df = pd.concat([pd.read_csv(file) for file in csv_files], ignore_index=True)
+acled_coverage_iso3_df = pd.read_csv("data/raw/ACLED_coverage_ISO3.csv")
+
+# Merge to add the "Country" column
+wdi_df = pd.merge(
+    wdi_raw_df,
+    acled_coverage_iso3_df[['ISO_3166-3', 'Country']],
+    how='left',
+    left_on='ISO_3',
+    right_on='ISO_3166-3'
+)
+
+# Event Raw Data
+event_data = pd.read_csv('data/last_month_acled.csv')
+available_event_dates = sorted(event_data['event_date'].unique())
+default_event_date = available_event_dates[-1]
+
+
 # Column dropdown options
 unavailable_cols = ['event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'month', 'quarter', 'week', 'violence index_exp_moving_avg', 'General', 'Legislative', 'Local', 'Parliamentary', 'Presidential', 'Referendum', 'holiday']
 unavailable_table_cols = ['country', 'month', 'quarter', 'week', 'event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'violence index_exp_moving_avg', 'General', 'Legislative', 'Local', 'Parliamentary', 'Presidential', 'Referendum', 'holiday']
@@ -88,10 +111,18 @@ crisis_type_options = [
     {'label': 'Probability of Mild Crisis (%)', 'value': 'probability of mild crisis (%)'}
 ]
 
-# Navbar layout
+# Navbar layout with dropdown menu for Monitoring
 navbar = dbc.NavbarSimple(
     children=[
-        dbc.NavItem(dbc.NavLink("Monitoring", href="/monitoring")),
+        dbc.DropdownMenu(
+            children=[
+                dbc.DropdownMenuItem("Monitoring ACLED", href="/monitoring/acled"),
+                dbc.DropdownMenuItem("Monitoring World Bank Data", href="/monitoring/worldbank"),
+            ],
+            nav=True,
+            in_navbar=True,
+            label="Monitoring",
+        ),
         dbc.NavItem(dbc.NavLink("Forecasting", href="/forecasting")),
     ],
     brand="Dashboard",
@@ -100,14 +131,9 @@ navbar = dbc.NavbarSimple(
     dark=True,
 )
 
-# Event Raw Data
-event_data = pd.read_csv('data/last_month_acled.csv')
-available_event_dates = sorted(event_data['event_date'].unique())
-default_event_date = available_event_dates[-1]
-
 # Monitoring layout
-monitoring_layout = html.Div([
-    html.H1('Monitoring Dashboard'),
+monitoring_acled_layout = html.Div([
+    html.H1('Monitoring ACLED Dashboard'),
     html.Div(className='container', children=[
         html.H2('Global Daily Events Map'),
         html.H3('Select a date, and the map will display the events that occurred on that day.'),
@@ -140,15 +166,46 @@ monitoring_layout = html.Div([
     ]),
     html.Footer(
         [
-        "Data source: Armed Conflict Location & Event Data Project (ACLED); Accessed on November 13th, 2024. ",
-        "See ", html.A("www.acleddata.com", href="https://www.acleddata.com", target="_blank"), " for more information.",
-        html.Br(),
         "Modifications from ACLED Data: Violence index calculated based on the paper ",
         html.A("Violence Index: a new data-driven proposal to conflict monitoring", href="https://dx.doi.org/10.4995/CARMA2024.2024.17831", target="_blank"),
         ],
     style={'textAlign': 'center', 'fontSize': 'small', 'padding': '10px'}
     ),
 ])
+
+# Monitoring World Bank Data layout
+monitoring_worldbank_layout = html.Div([
+    html.H1('Monitoring World Bank Data Dashboard'),
+    html.Div(className='container', children=[
+        html.H2('Ranking by Variable on an annual basis'),
+        dcc.Dropdown(
+            id='wb-ranking-column',
+            options=[{'label': col, 'value': col} for col in wdi_df.columns if col not in ['ISO_3', 'ISO_3166-3', 'Country', 'year']],
+            value=wdi_df.columns[2],  # Default to the first data column
+            clearable=False,
+            className='dcc-dropdown'
+        ),
+        dcc.Dropdown(
+            id='wb-ranking-year',
+            options=[],  # Initially empty; populated dynamically
+            value=None,  # Default will be set dynamically
+            clearable=False,
+            className='dcc-dropdown'
+        ),
+        dcc.Graph(id='wb-bar-plot', className='dcc-graph'),
+        html.H3('Select number of countries:'),
+        dcc.Slider(
+            id='wb-num-countries',
+            min=10,
+            max=len(wdi_df['Country'].unique()),
+            step=10,
+            value=10,
+            marks={i: str(i) for i in range(10, len(wdi_df['Country'].unique()) + 10, 10)}
+        ),
+        dcc.Graph(id='wb-world-map', className='dcc-graph')
+    ]),
+])
+
 
 # Forecasting layout
 forecasting_layout = html.Div([
@@ -173,9 +230,6 @@ forecasting_layout = html.Div([
     dcc.Graph(id='crisis-world-map', className='dcc-graph'),
     html.Footer(
         [
-        "Data source: Armed Conflict Location & Event Data Project (ACLED); Accessed on November 13th, 2024. ",
-        "See ", html.A("www.acleddata.com", href="https://www.acleddata.com", target="_blank"), " for more information.",
-        html.Br(),
         "Modifications from ACLED Data: Violence index calculated based on the paper ",
         html.A("Violence Index: a new data-driven proposal to conflict monitoring", href="https://dx.doi.org/10.4995/CARMA2024.2024.17831", target="_blank"),
         ],
@@ -191,12 +245,19 @@ app.layout = html.Div([
 ])
 
 # Page routing callback
-@app.callback(Output('page-content', 'children'), [Input('url', 'pathname')])
+@app.callback(
+    Output('page-content', 'children'),
+    Input('url', 'pathname')
+)
 def display_page(pathname):
-    if pathname == '/forecasting':
+    if pathname == '/monitoring/acled':
+        return monitoring_acled_layout
+    elif pathname == '/monitoring/worldbank':
+        return monitoring_worldbank_layout
+    elif pathname == '/forecasting':
         return forecasting_layout
     else:
-        return monitoring_layout  # Default to monitoring
+        return monitoring_acled_layout
 
 
 # Callback for event map
@@ -373,8 +434,72 @@ def update_line_plot_and_table(selected_column, selected_countries, plot_date):
     columns = columns_default + columns
 
     return line_fig, new_table_data, columns
-    
 
+
+# WDI: Create a filtered year dropdown
+@app.callback(
+    Output('wb-ranking-year', 'options'),
+    Input('wb-ranking-column', 'value')  # Dropdown for selecting variable
+)
+def update_year_options(selected_column):
+    # Filter the years based on the selected column
+    valid_years = wdi_df.loc[wdi_df[selected_column].notna(), 'year'].unique()
+    valid_years = sorted(valid_years)
+    return [{'label': year, 'value': year} for year in valid_years]
+
+# Example: Default value for the dropdown
+@app.callback(
+    Output('wb-ranking-year', 'value'),
+    Input('wb-ranking-year', 'options')
+)
+def set_default_year(year_options):
+    # Default to the most recent year in the filtered options
+    return year_options[-1]['value'] if year_options else None
+
+# Callbacks for the Bar Plot and World Map WDI
+@app.callback(
+    [Output('wb-bar-plot', 'figure'),
+     Output('wb-world-map', 'figure')],
+    [Input('wb-ranking-column', 'value'),
+     Input('wb-ranking-year', 'value'),
+     Input('wb-num-countries', 'value')]
+)
+def update_world_bank_graphs(selected_column, selected_year, num_countries):
+    # Filter data by year
+    filtered_data = wdi_df[wdi_df['year'] == selected_year]
+
+    # Sort data by the selected column and select top countries
+    sorted_data = filtered_data.sort_values(by=selected_column, ascending=False).head(num_countries)
+
+    # Create the bar plot
+    bar_fig = px.bar(
+        sorted_data,
+        x='Country',
+        y=selected_column,
+        template='plotly_dark',
+        color=selected_column,
+        color_continuous_scale='orrd',
+        title=f'Top {num_countries} countries by {selected_column} in {selected_year}'
+    )
+    bar_fig.update_layout(coloraxis_colorbar_title_text="")  # Remove color bar title
+
+    # Create the world map
+    map_fig = px.choropleth(
+        filtered_data,
+        locations="ISO_3",
+        color=selected_column,
+        hover_name="Country",
+        projection="natural earth",
+        color_continuous_scale=px.colors.sequential.OrRd,
+        title=f'{selected_column} by Country in {selected_year}',
+        template='plotly_dark'
+    )
+    map_fig.update_layout(coloraxis_colorbar_title_text="")  # Remove color bar title
+
+
+    return bar_fig, map_fig
+
+# Callbacks Forecasting
 @app.callback(
     [Output('forecast-bar-plot', 'figure'),
      Output('forecast-world-map', 'figure')],
