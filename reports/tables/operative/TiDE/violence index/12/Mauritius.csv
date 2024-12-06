@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+MUS,Mauritius,2024-11-30,0.5,2.8,13.6,2024-12-06
+MUS,Mauritius,2024-12-07,2.9,6.6,24.4,2024-12-13
+MUS,Mauritius,2024-12-14,3.6,8.8,27.7,2024-12-20
+MUS,Mauritius,2024-12-21,7.7,15.7,36.2,2024-12-27
+MUS,Mauritius,2024-12-28,5.6,14.6,41.5,2025-01-03
+MUS,Mauritius,2025-01-04,7.5,17.7,43.6,2025-01-10
+MUS,Mauritius,2025-01-11,7.2,16.6,48.3,2025-01-17
+MUS,Mauritius,2025-01-18,11.6,24.1,49.9,2025-01-24
+MUS,Mauritius,2025-01-25,12.1,25.8,56.5,2025-01-31
+MUS,Mauritius,2025-02-01,14.3,27.8,57.0,2025-02-07
+MUS,Mauritius,2025-02-08,15.2,29.0,58.5,2025-02-14
+MUS,Mauritius,2025-02-15,15.8,30.2,60.9,2025-02-21

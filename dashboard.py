@@ -9,13 +9,15 @@ import numpy as np
 import re
 from datetime import datetime, timedelta
 
+import sys
+
 # Initialize the Dash app with a Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
 
 # Paths to the relevant folders
 DATA_PATH = 'data/interim/data_ready/'
-FORECAST_PATH = 'models/TiDE/predictions/sampling/'
+FORECAST_PATH = 'models/TiDE/predictions/'
 FORECAST_HTML_PATH = 'docs/figures/operative/TiDE/default/'
 ISO3_PATH = 'data/raw/ACLED_coverage_ISO3.csv'
 
@@ -26,15 +28,15 @@ def load_all_data():
     return pd.concat(dfs, ignore_index=True)
 
 # Helper function to load forecast data
-def load_forecast_data(date_folder):
-    folder_path = os.path.join(FORECAST_PATH, date_folder)
+def load_forecast_data(variable, window):
+    folder_path = os.path.join(FORECAST_PATH, variable, window)
     files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
     dfs = [pd.read_csv(os.path.join(folder_path, file)) for file in files]
     return pd.concat(dfs, ignore_index=True)
 
 # Helper function to load crisis data
-def load_crisis_data(date):
-    CRISIS_REPORT_PATH = f'reports/tables/operative/TiDE/UDC_{date}/'
+def load_crisis_data(variable, window):
+    CRISIS_REPORT_PATH = f'reports/tables/operative/TiDE/{variable}/{window}'
     files = [f for f in os.listdir(CRISIS_REPORT_PATH) if f.endswith('.csv')]
     dfs = [pd.read_csv(os.path.join(CRISIS_REPORT_PATH, file)) for file in files]
     return pd.concat(dfs, ignore_index=True)
@@ -69,11 +71,15 @@ data = load_all_data()
 # Extract available dates and other options
 available_dates = sorted(data['event_date'].unique())[:-12]
 default_date = available_dates[-1]
-available_forecast_dates = sorted([f for f in os.listdir(FORECAST_PATH) if os.path.isdir(os.path.join(FORECAST_PATH, f))], reverse=True)
-default_forecast_date = available_forecast_dates[0]
+
+available_variables = sorted([f for f in os.listdir(FORECAST_PATH) if os.path.isdir(os.path.join(FORECAST_PATH, f))], reverse=True)
+default_variable = available_variables[1]
+
+available_windows = ["12", "24", "36"]
+default_window = available_windows[0]
 
 # Load initial crisis data
-crisis_data = load_crisis_data(default_forecast_date)
+crisis_data = load_crisis_data(default_variable, default_window)
 crisis_weeks = list(sorted(crisis_data['end of the week'].unique()))
 
 # Load the WDI dataframe and ACLED_coverage_ISO3 csv
@@ -235,11 +241,14 @@ monitoring_elections_layout = html.Div([
 # Forecasting layout
 forecasting_layout = html.Div([
     html.H1('Forecasting Dashboard'),
-    html.H2('Forecasting of most violent countries'),
-    dcc.Dropdown(id='forecast-date', options=[{'label': transform_date_to_day_first(date), 'value': date} for date in available_forecast_dates], value=default_forecast_date, clearable=False, className='dcc-dropdown'),
+    html.H2('Global Forecasting'),
+    html.H3('Select variable to forecast:'),
+    dcc.Dropdown(id='forecast-variable', options=[{'label': variable, 'value': variable} for variable in available_variables], value=default_variable, clearable=False, className='dcc-dropdown'),
+    html.H3('Select forecasting window:'),
+    dcc.Dropdown(id='forecast-window', options=[{'label': window, 'value': window} for window in available_windows], value=default_window, clearable=False, className='dcc-dropdown'),
     html.H3('Select forecasted week:'),
-    dcc.Slider(id='forecast-slider', min=0, max=11, step=1, value=0, marks={i: f'Forecast {i+1}' for i in range(12)}),
-    html.H3('Select outcome level:'),
+    dcc.Slider(id='forecast-slider', min=0, max=11, step=1, value=0, marks={}),
+    html.H3('Select outcome level: (0 = min outcome predicted, 100 = max outcome predicted)'),
     dcc.Slider(id='percentile-slider', min=0, max=100, step=1, value=50, marks={i: str(i) for i in range(0, 101, 10)}),
     dcc.Graph(id='forecast-bar-plot', className='dcc-graph'),
     html.H3('Select number of countries:'),
@@ -580,17 +589,39 @@ def update_tables(selected_year):
     return tables
 
 
+# Callback for the forecasting slider
+@app.callback(
+    Output('forecast-slider', 'min'),  # Update the minimum value of the slider
+    Output('forecast-slider', 'max'),  # Update the maximum value of the slider
+    Output('forecast-slider', 'marks'),  # Update the marks of the slider
+    Output('forecast-slider', 'value'),  # Update the default value of the slider
+    Input('forecast-window', 'value')  # Triggered by changes in 'forecast-window'
+)
+def update_forecast_slider(forecast_window):
+
+    forecast_window = int(forecast_window)
+    # Set slider range dynamically based on the forecast window
+    min_value = 0
+    max_value = forecast_window - 1  # Maximum value is window size - 1
+    marks = {i: i+1 for i in range(forecast_window)}  # Generate marks dynamically
+    default_value = 0  # Default to the first week
+
+    return min_value, max_value, marks, default_value
+
+
+
 # Callbacks Forecasting
 @app.callback(
     [Output('forecast-bar-plot', 'figure'),
      Output('forecast-world-map', 'figure')],
-    [Input('forecast-date', 'value'),
+    [Input('forecast-variable', 'value'),
+    Input('forecast-window', 'value'),
      Input('forecast-slider', 'value'),
      Input('percentile-slider', 'value'),
      Input('num-forecasted-countries', 'value')])
 
-def update_forecasting_dashboard(selected_date, forecast_step, percentile, num_forecasted_countries):
-    forecast_data = load_forecast_data(selected_date)
+def update_forecasting_dashboard(selected_variable, selected_window, forecast_step, percentile, num_forecasted_countries):
+    forecast_data = load_forecast_data(selected_variable, selected_window)
     iso3_data = pd.read_csv(ISO3_PATH)
     forecast_data = forecast_data.merge(iso3_data[['Country', 'ISO_3166-3']], left_on='country', right_on='Country')
     forecast_data.rename(columns={'ISO_3166-3': 'ISO_3'}, inplace=True)
@@ -599,7 +630,9 @@ def update_forecasting_dashboard(selected_date, forecast_step, percentile, num_f
     outcome_percentiles = forecast_data.groupby('ISO_3')['outcome'].quantile(percentile / 100).reset_index()
     outcome_sorted_percentiles = outcome_percentiles.sort_values(by='outcome', ascending=False).head(num_forecasted_countries)
 
-    bar_fig = px.bar(outcome_sorted_percentiles, x='ISO_3', y='outcome', template='plotly_dark', color='outcome', color_continuous_scale='orrd')
+    forecasted_date = forecast_data['forecast'].unique()[0]
+
+    bar_fig = px.bar(outcome_sorted_percentiles, x='ISO_3', y='outcome', template='plotly_dark', color='outcome', color_continuous_scale='orrd', title=f"Prediction for: {forecasted_date}")
     map_fig = px.choropleth(outcome_percentiles, locations="ISO_3", color="outcome", hover_name="ISO_3", projection="natural earth", color_continuous_scale=px.colors.sequential.OrRd, template='plotly_dark')
     map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0))#paper_bgcolor="#F6F5EC", plot_bgcolor="#F6F5EC"
     #map_fig.update_geos(fitbounds='locations', visible=False, bgcolor='#F6F5EC')
@@ -615,13 +648,37 @@ def update_forecast_line_plot(country):
     with open(html_file_path, 'r') as file:
         return file.read()
 
+
+# Callback to update crisis_data and crisis_weeks
+@app.callback(
+    Output('crisis-end-week', 'options'),   # Update the options of the 'crisis-end-week' dropdown
+    Output('crisis-end-week', 'value'),    # Update the selected value of the 'crisis-end-week' dropdown
+    Input('forecast-variable', 'value'),   # Triggered by changes in 'forecast-variable'
+    Input('forecast-window', 'value')      # Triggered by changes in 'forecast-window'
+)
+def update_crisis_dropdown(forecast_variable, forecast_window):
+    # Load updated crisis data based on the selected variable and window
+    crisis_data = load_crisis_data(forecast_variable, forecast_window)
+    
+    # Update the list of unique crisis weeks
+    crisis_weeks = list(sorted(crisis_data['end of the week'].unique()))
+    
+    # Create dropdown options and default value
+    options = [{'label': transform_date_to_day_first(week), 'value': week} for week in crisis_weeks]
+    default_value = crisis_weeks[0] if crisis_weeks else None
+    
+    return options, default_value
+
+
 # Callback for crisis map
 @app.callback(Output('crisis-world-map', 'figure'),
               [Input('crisis-end-week', 'value'),
+              Input('forecast-variable', 'value'),
+              Input('forecast-window', 'value'),
                Input('crisis-type', 'value')])
 
-def update_crisis_map(selected_week, crisis_type):
-    crisis_data = load_crisis_data(default_forecast_date)
+def update_crisis_map(selected_week, selected_variable, selected_window, crisis_type):
+    crisis_data = load_crisis_data(selected_variable, selected_window)
     filtered_data = crisis_data[crisis_data['end of the week'] == selected_week]
     world_map_fig = px.choropleth(filtered_data, locations="iso3", color=crisis_type, hover_name="country", projection="natural earth", color_continuous_scale=px.colors.sequential.OrRd, template='plotly_dark')
     world_map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0))

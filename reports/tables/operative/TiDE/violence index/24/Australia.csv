@@ -1,0 +1,25 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+AUS,Australia,2024-11-30,0.0,1.4,23.1,2024-12-06
+AUS,Australia,2024-12-07,0.0,1.6,19.3,2024-12-13
+AUS,Australia,2024-12-14,0.0,0.9,18.8,2024-12-20
+AUS,Australia,2024-12-21,0.0,1.4,20.6,2024-12-27
+AUS,Australia,2024-12-28,0.0,1.9,22.8,2025-01-03
+AUS,Australia,2025-01-04,0.0,2.2,23.3,2025-01-10
+AUS,Australia,2025-01-11,0.0,3.2,25.0,2025-01-17
+AUS,Australia,2025-01-18,0.0,1.7,26.2,2025-01-24
+AUS,Australia,2025-01-25,0.0,2.2,23.4,2025-01-31
+AUS,Australia,2025-02-01,0.0,1.3,21.0,2025-02-07
+AUS,Australia,2025-02-08,0.0,1.4,21.0,2025-02-14
+AUS,Australia,2025-02-15,0.0,1.0,18.1,2025-02-21
+AUS,Australia,2025-02-22,0.0,1.3,20.5,2025-02-28
+AUS,Australia,2025-03-01,0.0,0.7,19.4,2025-03-07
+AUS,Australia,2025-03-08,0.0,1.3,21.4,2025-03-14
+AUS,Australia,2025-03-15,0.0,2.2,22.0,2025-03-21
+AUS,Australia,2025-03-22,0.0,2.0,22.2,2025-03-28
+AUS,Australia,2025-03-29,0.0,1.7,20.5,2025-04-04
+AUS,Australia,2025-04-05,0.0,2.1,19.8,2025-04-11
+AUS,Australia,2025-04-12,0.0,1.3,21.6,2025-04-18
+AUS,Australia,2025-04-19,0.0,1.4,21.7,2025-04-25
+AUS,Australia,2025-04-26,0.0,1.5,25.3,2025-05-02
+AUS,Australia,2025-05-03,0.0,1.8,23.0,2025-05-09
+AUS,Australia,2025-05-10,0.0,2.2,25.1,2025-05-16

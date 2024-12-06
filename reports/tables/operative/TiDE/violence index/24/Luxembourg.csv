@@ -1,0 +1,25 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+LUX,Luxembourg,2024-11-30,0.0,4.5,41.1,2024-12-06
+LUX,Luxembourg,2024-12-07,0.0,5.3,50.4,2024-12-13
+LUX,Luxembourg,2024-12-14,0.0,6.8,58.0,2024-12-20
+LUX,Luxembourg,2024-12-21,0.0,6.4,64.0,2024-12-27
+LUX,Luxembourg,2024-12-28,0.0,0.2,79.3,2025-01-03
+LUX,Luxembourg,2025-01-04,0.0,5.3,71.2,2025-01-10
+LUX,Luxembourg,2025-01-11,0.0,2.0,78.2,2025-01-17
+LUX,Luxembourg,2025-01-18,0.0,6.3,74.5,2025-01-24
+LUX,Luxembourg,2025-01-25,0.0,4.8,76.7,2025-01-31
+LUX,Luxembourg,2025-02-01,0.0,8.9,77.0,2025-02-07
+LUX,Luxembourg,2025-02-08,0.0,16.7,75.8,2025-02-14
+LUX,Luxembourg,2025-02-15,0.0,12.1,81.4,2025-02-21
+LUX,Luxembourg,2025-02-22,0.1,22.8,72.2,2025-02-28
+LUX,Luxembourg,2025-03-01,0.0,13.0,86.3,2025-03-07
+LUX,Luxembourg,2025-03-08,0.0,7.2,94.6,2025-03-14
+LUX,Luxembourg,2025-03-15,0.0,24.2,78.0,2025-03-21
+LUX,Luxembourg,2025-03-22,0.0,22.8,86.2,2025-03-28
+LUX,Luxembourg,2025-03-29,0.0,13.4,96.2,2025-04-04
+LUX,Luxembourg,2025-04-05,0.0,26.9,80.9,2025-04-11
+LUX,Luxembourg,2025-04-12,0.0,25.5,87.8,2025-04-18
+LUX,Luxembourg,2025-04-19,0.0,18.6,93.9,2025-04-25
+LUX,Luxembourg,2025-04-26,0.0,30.2,86.8,2025-05-02
+LUX,Luxembourg,2025-05-03,0.0,22.6,95.0,2025-05-09
+LUX,Luxembourg,2025-05-10,0.0,29.5,90.3,2025-05-16

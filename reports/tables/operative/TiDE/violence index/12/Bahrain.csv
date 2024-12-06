@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+BHR,Bahrain,2024-11-30,0.0,0.0,0.3,2024-12-06
+BHR,Bahrain,2024-12-07,0.0,0.0,0.3,2024-12-13
+BHR,Bahrain,2024-12-14,0.0,0.0,1.0,2024-12-20
+BHR,Bahrain,2024-12-21,0.0,0.0,1.5,2024-12-27
+BHR,Bahrain,2024-12-28,0.0,0.0,2.5,2025-01-03
+BHR,Bahrain,2025-01-04,0.0,0.0,3.8,2025-01-10
+BHR,Bahrain,2025-01-11,0.0,0.0,2.8,2025-01-17
+BHR,Bahrain,2025-01-18,0.0,0.0,3.4,2025-01-24
+BHR,Bahrain,2025-01-25,0.0,0.0,4.0,2025-01-31
+BHR,Bahrain,2025-02-01,0.0,0.0,5.4,2025-02-07
+BHR,Bahrain,2025-02-08,0.0,0.0,4.9,2025-02-14
+BHR,Bahrain,2025-02-15,0.0,0.0,6.3,2025-02-21

@@ -1,0 +1,25 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+MRT,Mauritania,2024-11-30,0.0,12.5,36.6,2024-12-06
+MRT,Mauritania,2024-12-07,0.0,15.9,40.8,2024-12-13
+MRT,Mauritania,2024-12-14,0.0,17.2,46.3,2024-12-20
+MRT,Mauritania,2024-12-21,0.1,22.9,47.9,2024-12-27
+MRT,Mauritania,2024-12-28,0.0,22.0,54.3,2025-01-03
+MRT,Mauritania,2025-01-04,0.1,23.9,55.5,2025-01-10
+MRT,Mauritania,2025-01-11,0.0,25.9,56.2,2025-01-17
+MRT,Mauritania,2025-01-18,0.4,27.4,59.1,2025-01-24
+MRT,Mauritania,2025-01-25,0.6,30.4,59.1,2025-01-31
+MRT,Mauritania,2025-02-01,0.1,31.8,59.8,2025-02-07
+MRT,Mauritania,2025-02-08,0.1,33.2,62.7,2025-02-14
+MRT,Mauritania,2025-02-15,0.1,33.6,67.0,2025-02-21
+MRT,Mauritania,2025-02-22,0.4,39.2,65.2,2025-02-28
+MRT,Mauritania,2025-03-01,0.5,37.7,67.9,2025-03-07
+MRT,Mauritania,2025-03-08,0.2,39.2,70.2,2025-03-14
+MRT,Mauritania,2025-03-15,0.2,41.5,70.5,2025-03-21
+MRT,Mauritania,2025-03-22,0.0,42.4,74.0,2025-03-28
+MRT,Mauritania,2025-03-29,0.3,40.7,70.5,2025-04-04
+MRT,Mauritania,2025-04-05,0.1,42.6,70.8,2025-04-11
+MRT,Mauritania,2025-04-12,0.4,45.6,73.2,2025-04-18
+MRT,Mauritania,2025-04-19,0.1,45.0,75.4,2025-04-25
+MRT,Mauritania,2025-04-26,0.4,45.8,76.1,2025-05-02
+MRT,Mauritania,2025-05-03,0.6,48.2,76.4,2025-05-09
+MRT,Mauritania,2025-05-10,0.8,47.7,77.4,2025-05-16

@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+KOR,South Korea,2024-11-30,0.1,2.3,16.3,2024-12-06
+KOR,South Korea,2024-12-07,0.3,2.8,17.3,2024-12-13
+KOR,South Korea,2024-12-14,0.2,3.5,16.5,2024-12-20
+KOR,South Korea,2024-12-21,0.3,2.7,16.5,2024-12-27
+KOR,South Korea,2024-12-28,0.2,2.1,16.4,2025-01-03
+KOR,South Korea,2025-01-04,0.3,4.5,19.0,2025-01-10
+KOR,South Korea,2025-01-11,0.1,2.8,20.0,2025-01-17
+KOR,South Korea,2025-01-18,0.1,2.3,16.7,2025-01-24
+KOR,South Korea,2025-01-25,0.0,2.5,18.1,2025-01-31
+KOR,South Korea,2025-02-01,0.4,3.4,18.3,2025-02-07
+KOR,South Korea,2025-02-08,0.2,2.9,17.6,2025-02-14
+KOR,South Korea,2025-02-15,0.1,3.6,19.4,2025-02-21

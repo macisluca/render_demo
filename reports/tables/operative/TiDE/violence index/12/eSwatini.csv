@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+SWZ,eSwatini,2024-11-30,0.0,0.0,14.0,2024-12-06
+SWZ,eSwatini,2024-12-07,0.0,0.0,21.2,2024-12-13
+SWZ,eSwatini,2024-12-14,0.0,0.1,26.4,2024-12-20
+SWZ,eSwatini,2024-12-21,0.0,0.0,30.2,2024-12-27
+SWZ,eSwatini,2024-12-28,0.0,0.1,35.0,2025-01-03
+SWZ,eSwatini,2025-01-04,0.0,0.1,36.5,2025-01-10
+SWZ,eSwatini,2025-01-11,0.0,0.3,40.0,2025-01-17
+SWZ,eSwatini,2025-01-18,0.0,0.3,41.5,2025-01-24
+SWZ,eSwatini,2025-01-25,0.0,0.9,44.0,2025-01-31
+SWZ,eSwatini,2025-02-01,0.0,1.0,45.3,2025-02-07
+SWZ,eSwatini,2025-02-08,0.0,0.7,47.6,2025-02-14
+SWZ,eSwatini,2025-02-15,0.0,0.3,48.0,2025-02-21

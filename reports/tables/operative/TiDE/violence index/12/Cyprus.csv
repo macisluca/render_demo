@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+CYP,Cyprus,2024-11-30,0.0,0.8,10.9,2024-12-06
+CYP,Cyprus,2024-12-07,0.0,1.8,12.2,2024-12-13
+CYP,Cyprus,2024-12-14,0.0,2.5,15.4,2024-12-20
+CYP,Cyprus,2024-12-21,0.0,3.5,20.6,2024-12-27
+CYP,Cyprus,2024-12-28,0.0,2.2,20.3,2025-01-03
+CYP,Cyprus,2025-01-04,0.2,2.6,21.9,2025-01-10
+CYP,Cyprus,2025-01-11,0.2,3.8,24.6,2025-01-17
+CYP,Cyprus,2025-01-18,0.2,5.1,26.3,2025-01-24
+CYP,Cyprus,2025-01-25,0.3,6.3,28.6,2025-01-31
+CYP,Cyprus,2025-02-01,0.3,5.1,30.1,2025-02-07
+CYP,Cyprus,2025-02-08,0.3,8.5,30.1,2025-02-14
+CYP,Cyprus,2025-02-15,0.1,6.8,32.6,2025-02-21

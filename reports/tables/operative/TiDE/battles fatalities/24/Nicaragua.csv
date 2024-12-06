@@ -1,0 +1,25 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+NIC,Nicaragua,2024-11-30,0.1,0.4,3.6,2024-12-06
+NIC,Nicaragua,2024-12-07,0.1,0.3,3.2,2024-12-13
+NIC,Nicaragua,2024-12-14,0.3,0.9,2.8,2024-12-20
+NIC,Nicaragua,2024-12-21,0.2,0.6,2.9,2024-12-27
+NIC,Nicaragua,2024-12-28,0.0,0.3,3.5,2025-01-03
+NIC,Nicaragua,2025-01-04,0.1,0.4,2.7,2025-01-10
+NIC,Nicaragua,2025-01-11,0.3,0.9,3.2,2025-01-17
+NIC,Nicaragua,2025-01-18,0.3,0.7,3.5,2025-01-24
+NIC,Nicaragua,2025-01-25,0.1,0.4,3.4,2025-01-31
+NIC,Nicaragua,2025-02-01,0.1,0.8,3.3,2025-02-07
+NIC,Nicaragua,2025-02-08,0.1,0.8,3.6,2025-02-14
+NIC,Nicaragua,2025-02-15,0.3,0.8,3.9,2025-02-21
+NIC,Nicaragua,2025-02-22,0.1,0.3,3.7,2025-02-28
+NIC,Nicaragua,2025-03-01,0.3,1.1,3.7,2025-03-07
+NIC,Nicaragua,2025-03-08,0.1,0.3,1.7,2025-03-14
+NIC,Nicaragua,2025-03-15,0.1,0.5,3.8,2025-03-21
+NIC,Nicaragua,2025-03-22,0.1,0.4,2.9,2025-03-28
+NIC,Nicaragua,2025-03-29,0.2,0.7,3.1,2025-04-04
+NIC,Nicaragua,2025-04-05,0.2,0.3,3.0,2025-04-11
+NIC,Nicaragua,2025-04-12,0.1,0.7,2.8,2025-04-18
+NIC,Nicaragua,2025-04-19,0.3,0.8,3.0,2025-04-25
+NIC,Nicaragua,2025-04-26,0.1,0.3,2.6,2025-05-02
+NIC,Nicaragua,2025-05-03,0.0,0.4,3.1,2025-05-09
+NIC,Nicaragua,2025-05-10,0.1,0.9,3.6,2025-05-16

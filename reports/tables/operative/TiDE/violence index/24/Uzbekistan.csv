@@ -1,0 +1,25 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+UZB,Uzbekistan,2024-11-30,0.0,1.1,14.6,2024-12-06
+UZB,Uzbekistan,2024-12-07,0.0,2.4,18.0,2024-12-13
+UZB,Uzbekistan,2024-12-14,0.0,3.2,20.8,2024-12-20
+UZB,Uzbekistan,2024-12-21,0.0,3.7,22.1,2024-12-27
+UZB,Uzbekistan,2024-12-28,0.0,3.6,27.4,2025-01-03
+UZB,Uzbekistan,2025-01-04,0.0,5.6,29.2,2025-01-10
+UZB,Uzbekistan,2025-01-11,0.0,4.6,29.5,2025-01-17
+UZB,Uzbekistan,2025-01-18,0.0,5.1,30.1,2025-01-24
+UZB,Uzbekistan,2025-01-25,0.0,4.8,32.2,2025-01-31
+UZB,Uzbekistan,2025-02-01,0.0,6.5,33.1,2025-02-07
+UZB,Uzbekistan,2025-02-08,0.0,5.1,33.0,2025-02-14
+UZB,Uzbekistan,2025-02-15,0.0,5.7,35.6,2025-02-21
+UZB,Uzbekistan,2025-02-22,0.0,7.7,40.6,2025-02-28
+UZB,Uzbekistan,2025-03-01,0.0,8.3,42.0,2025-03-07
+UZB,Uzbekistan,2025-03-08,0.0,9.0,42.3,2025-03-14
+UZB,Uzbekistan,2025-03-15,0.0,9.8,42.5,2025-03-21
+UZB,Uzbekistan,2025-03-22,0.0,8.8,41.8,2025-03-28
+UZB,Uzbekistan,2025-03-29,0.0,9.3,44.9,2025-04-04
+UZB,Uzbekistan,2025-04-05,0.0,12.3,45.1,2025-04-11
+UZB,Uzbekistan,2025-04-12,0.0,13.1,45.5,2025-04-18
+UZB,Uzbekistan,2025-04-19,0.0,13.1,45.9,2025-04-25
+UZB,Uzbekistan,2025-04-26,0.0,13.0,48.5,2025-05-02
+UZB,Uzbekistan,2025-05-03,0.0,13.0,46.4,2025-05-09
+UZB,Uzbekistan,2025-05-10,0.0,12.8,47.5,2025-05-16

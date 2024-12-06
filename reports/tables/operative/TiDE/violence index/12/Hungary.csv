@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+HUN,Hungary,2024-11-30,0.0,0.4,8.2,2024-12-06
+HUN,Hungary,2024-12-07,0.0,1.2,12.5,2024-12-13
+HUN,Hungary,2024-12-14,0.0,1.3,16.5,2024-12-20
+HUN,Hungary,2024-12-21,0.0,2.8,23.4,2024-12-27
+HUN,Hungary,2024-12-28,0.0,5.0,26.8,2025-01-03
+HUN,Hungary,2025-01-04,0.0,7.3,30.1,2025-01-10
+HUN,Hungary,2025-01-11,0.0,6.9,33.5,2025-01-17
+HUN,Hungary,2025-01-18,0.0,8.8,36.4,2025-01-24
+HUN,Hungary,2025-01-25,0.0,7.7,39.2,2025-01-31
+HUN,Hungary,2025-02-01,0.0,10.5,40.1,2025-02-07
+HUN,Hungary,2025-02-08,0.0,11.5,42.3,2025-02-14
+HUN,Hungary,2025-02-15,0.0,11.7,44.6,2025-02-21

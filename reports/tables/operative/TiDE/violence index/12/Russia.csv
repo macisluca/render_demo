@@ -1,0 +1,13 @@
+iso3,country,start of the week,probability of extreme crisis (%),probability of severe crisis (%),probability of mild crisis (%),end of the week
+RUS,Russia,2024-11-30,4.9,12.3,85.8,2024-12-06
+RUS,Russia,2024-12-07,3.8,10.8,85.8,2024-12-13
+RUS,Russia,2024-12-14,0.6,2.7,94.7,2024-12-20
+RUS,Russia,2024-12-21,0.2,1.8,97.0,2024-12-27
+RUS,Russia,2024-12-28,7.1,14.7,85.8,2025-01-03
+RUS,Russia,2025-01-04,5.8,14.0,87.8,2025-01-10
+RUS,Russia,2025-01-11,9.4,17.2,85.1,2025-01-17
+RUS,Russia,2025-01-18,6.6,14.9,87.0,2025-01-24
+RUS,Russia,2025-01-25,3.2,9.6,93.8,2025-01-31
+RUS,Russia,2025-02-01,6.3,15.1,87.9,2025-02-07
+RUS,Russia,2025-02-08,11.5,21.7,83.7,2025-02-14
+RUS,Russia,2025-02-15,9.1,17.3,88.0,2025-02-21
