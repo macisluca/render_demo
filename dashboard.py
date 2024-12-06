@@ -84,6 +84,17 @@ csv_files = [os.path.join(directory_wdi, file) for file in os.listdir(directory_
 wdi_raw_df = pd.concat([pd.read_csv(file) for file in csv_files], ignore_index=True)
 acled_coverage_iso3_df = pd.read_csv("data/raw/ACLED_coverage_ISO3.csv")
 
+# Load elections data
+elections_df = pd.read_csv("data/elections_calendar.csv")
+# Convert '_begin' to datetime, and ensure that invalid values are coerced to NaT (Not a Time)
+elections_df['_begin'] = pd.to_datetime(elections_df['_begin'], errors='coerce', utc=True)
+# Now create the 'date' column as a datetime.date object (if not already done)
+elections_df['date'] = pd.to_datetime(elections_df['_begin'].dt.date)
+elections_df['year'] = elections_df['_begin'].dt.year
+elections_df['month'] = elections_df['_begin'].dt.month_name()
+# Sort by date
+elections_df = elections_df.sort_values(by='date', ascending=False)
+
 # Merge to add the "Country" column
 wdi_df = pd.merge(
     wdi_raw_df,
@@ -118,6 +129,7 @@ navbar = dbc.NavbarSimple(
             children=[
                 dbc.DropdownMenuItem("Monitoring ACLED", href="/monitoring/acled"),
                 dbc.DropdownMenuItem("Monitoring World Bank Data", href="/monitoring/worldbank"),
+                dbc.DropdownMenuItem("Monitoring Elections Calendar", href="/monitoring/elections"),
             ],
             nav=True,
             in_navbar=True,
@@ -206,6 +218,19 @@ monitoring_worldbank_layout = html.Div([
     ]),
 ])
 
+# Now, the dropdown should work as expected:
+monitoring_elections_layout = html.Div([
+    html.H1("Monitoring Elections"),
+    dcc.Dropdown(
+        id='year-dropdown',
+        className='dcc-dropdown',
+        options=[{'label': str(year), 'value': year} for year in sorted(elections_df['year'].unique())],
+        value=sorted(elections_df['year'].unique())[-1],  # Default to the latest year
+        clearable=False,
+        placeholder="Select a year"
+    ),
+    html.Div(id='tables-container')  # Container for monthly tables
+])
 
 # Forecasting layout
 forecasting_layout = html.Div([
@@ -254,6 +279,8 @@ def display_page(pathname):
         return monitoring_acled_layout
     elif pathname == '/monitoring/worldbank':
         return monitoring_worldbank_layout
+    elif pathname == '/monitoring/elections':
+        return monitoring_elections_layout
     elif pathname == '/forecasting':
         return forecasting_layout
     else:
@@ -498,6 +525,60 @@ def update_world_bank_graphs(selected_column, selected_year, num_countries):
 
 
     return bar_fig, map_fig
+
+
+# Callback to generate tables
+@app.callback(
+    Output('tables-container', 'children'),
+    Input('year-dropdown', 'value')
+)
+def update_tables(selected_year):
+    if selected_year is None:
+        return html.Div("Please select a year.")
+
+    # Filter elections for the selected year
+    year_df = elections_df[elections_df['year'] == selected_year].copy()
+    # Format the 'date' column and sort by date
+    year_df['formatted_date'] = year_df['date'].dt.strftime('%d %B')
+    year_df = year_df.sort_values(by='date')
+
+    # Prepare a table for each month
+    months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
+    tables = []
+    for month in months:
+        # Filter elections for this month
+        month_df = year_df[year_df['month'] == month][['formatted_date', 'title']]
+
+        if not month_df.empty:
+            # Create a table with election data
+            table = dash_table.DataTable(
+                columns=[
+                    {"name": "Date", "id": "formatted_date"},
+                    {"name": "Election Title", "id": "title"}
+                ],
+                data=month_df.to_dict('records'),
+                style_table={'width': '100%'},
+                style_data={'color': 'white','backgroundColor': 'rgb(50, 50, 50)'},
+                style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white', 'fontWeight': 'bold'},
+                style_cell={'textAlign': 'left', 'height': 'auto', 'minWidth': '90px', 'width': '180px', 'maxWidth': '180px', 'whiteSpace': 'normal'},
+
+            )
+        else:
+            # No elections for this month
+            table = html.Div("No elections", style={'color': 'gray', 'fontStyle': 'italic'})
+
+        # Add a header and table to the layout
+        tables.append(html.Div([
+            html.H3(month),
+            table,
+            html.Hr(style={'borderTop': '1px solid black'})
+        ]))
+
+    return tables
+
 
 # Callbacks Forecasting
 @app.callback(
