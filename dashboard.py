@@ -508,8 +508,8 @@ def update_world_bank_graphs(selected_column, selected_year, num_countries):
         color_continuous_scale='orrd',
         title=f'Top {num_countries} countries by {selected_column} in {selected_year}'
     )
-    bar_fig.update_layout(coloraxis_colorbar_title_text="")  # Remove color bar title
-
+    bar_fig.update_layout(coloraxis_colorbar_title_text="", )  # Remove color bar title
+    bar_fig.update_yaxes(visible=False, showticklabels=False)
     # Create the world map
     map_fig = px.choropleth(
         filtered_data,
