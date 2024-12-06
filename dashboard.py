@@ -18,7 +18,7 @@ server = app.server
 # Paths to the relevant folders
 DATA_PATH = 'data/interim/data_ready/'
 FORECAST_PATH = 'models/TiDE/predictions/'
-FORECAST_HTML_PATH = 'docs/figures/operative/TiDE/default/'
+FORECAST_HTML_PATH = 'docs/figures/operative/TiDE/'
 ISO3_PATH = 'data/raw/ACLED_coverage_ISO3.csv'
 
 # Helper function to load CSV data
@@ -254,7 +254,7 @@ forecasting_layout = html.Div([
     html.H3('Select number of countries:'),
     dcc.Slider(id='num-forecasted-countries', min=10, max=160, step=10, value=10, marks={i: str(i) for i in range(10, 160, 10)}),
     dcc.Graph(id='forecast-world-map', className='dcc-graph'),
-    html.H2('Select Country Violence Forecasts'),
+    html.H2('Select Country Forecasts'),
     dcc.Dropdown(id='forecast-country', options=[{'label': c, 'value': c} for c in sorted(data['country'].unique())], value='Afghanistan', clearable=False, className='dcc-dropdown'),
     html.Iframe(id='forecast-line-plot', style={'width': '100%', 'height': '600px'}),
     html.H2('Crisis Map'),
@@ -641,10 +641,12 @@ def update_forecasting_dashboard(selected_variable, selected_window, forecast_st
 
 # Callbacks for embedding forecast HTML plots
 @app.callback(Output('forecast-line-plot', 'srcDoc'),
-              [Input('forecast-country', 'value')])
+              [Input('forecast-country', 'value'),
+                Input('forecast-variable', 'value'),   # Triggered by changes in 'forecast-variable'
+                Input('forecast-window', 'value') ])
 
-def update_forecast_line_plot(country):
-    html_file_path = os.path.join(FORECAST_HTML_PATH, f'{country}.html')
+def update_forecast_line_plot(country, forecast_variable, forecast_window):
+    html_file_path = os.path.join(FORECAST_HTML_PATH, forecast_variable, forecast_window, f'{country}.html')
     with open(html_file_path, 'r') as file:
         return file.read()
 
