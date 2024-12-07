@@ -333,7 +333,14 @@ def update_event_map(selected_date):
                             template='plotly_dark')
 
     # Update map style
-    fig.update_layout(mapbox_style="carto-positron")
+    fig.update_layout(mapbox_style="carto-positron",
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1,
+    ))
 
     # Add ACLED attribution annotation
     fig.add_annotation(
@@ -382,7 +389,8 @@ def update_bar_and_map(selected_column, selected_date, num_countries):
     bar_fig = px.bar(sorted_data, x='country', y=selected_column, template='plotly_dark',
                      color=selected_column, color_continuous_scale='orrd',
                  title=f'Top {num_countries} countries by {selected_column} from {transform_date_to_day_first(six_days_before_str)} to {transform_date_to_day_first(selected_date)}')
-    
+    bar_fig.update_layout(coloraxis_colorbar_title_text="", )  # Remove color bar title
+
     # Create the world map
     map_fig = px.choropleth(
         filtered_data,
@@ -396,7 +404,8 @@ def update_bar_and_map(selected_column, selected_date, num_countries):
     )
     map_fig.update_layout(autosize=False, margin = dict(l=0,r=0,b=0,t=0,pad=4,autoexpand=True),
         title_text=selected_column + ' by Country',
-        geo=dict(showframe=False, showcoastlines=True, projection_type='natural earth')
+        geo=dict(showframe=False, showcoastlines=True, projection_type='natural earth'),
+        coloraxis_colorbar_title_text=""  # Remove color bar title
     )
     return bar_fig, map_fig
 
@@ -436,6 +445,8 @@ def update_line_plot_and_table(selected_column, selected_countries, plot_date):
         line_fig.add_scatter(x=[plot_date], y=[y_value], mode='markers',
                              marker=dict(color='white', size=10, symbol='circle'),
                              name=f'{country} date')
+
+    line_fig.update_layout(legend=dict(orientation="h",yanchor="bottom",y=1.02,xanchor="right",x=1,))
     
     # Prepare the table data for the selected countries
     table_data = []
@@ -549,6 +560,9 @@ def update_tables(selected_year):
     year_df = elections_df[elections_df['year'] == selected_year].copy()
     # Format the 'date' column and sort by date
     year_df['formatted_date'] = year_df['date'].dt.strftime('%d %B')
+    # Change 31 december to "to be scheduled"
+    year_df['formatted_date'] = year_df['date'].apply(
+    lambda x: "to be scheduled" if x.strftime('%d %B') == '31 December' else x.strftime('%d %B'))
     year_df = year_df.sort_values(by='date')
 
     # Prepare a table for each month
@@ -633,8 +647,10 @@ def update_forecasting_dashboard(selected_variable, selected_window, forecast_st
     forecasted_date = forecast_data['forecast'].unique()[0]
 
     bar_fig = px.bar(outcome_sorted_percentiles, x='ISO_3', y='outcome', template='plotly_dark', color='outcome', color_continuous_scale='orrd', title=f"Prediction for: {forecasted_date}")
+    bar_fig.update_layout(coloraxis_colorbar_title_text="", )  # Remove color bar title
+
     map_fig = px.choropleth(outcome_percentiles, locations="ISO_3", color="outcome", hover_name="ISO_3", projection="natural earth", color_continuous_scale=px.colors.sequential.OrRd, template='plotly_dark')
-    map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0))#paper_bgcolor="#F6F5EC", plot_bgcolor="#F6F5EC"
+    map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0), coloraxis_colorbar_title_text="")#paper_bgcolor="#F6F5EC", plot_bgcolor="#F6F5EC"
     #map_fig.update_geos(fitbounds='locations', visible=False, bgcolor='#F6F5EC')
     return bar_fig, map_fig
 
@@ -683,7 +699,7 @@ def update_crisis_map(selected_week, selected_variable, selected_window, crisis_
     crisis_data = load_crisis_data(selected_variable, selected_window)
     filtered_data = crisis_data[crisis_data['end of the week'] == selected_week]
     world_map_fig = px.choropleth(filtered_data, locations="iso3", color=crisis_type, hover_name="country", projection="natural earth", color_continuous_scale=px.colors.sequential.OrRd, template='plotly_dark')
-    world_map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0))
+    world_map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0), coloraxis_colorbar_title_text="")
     return world_map_fig
 
 # Start the app
