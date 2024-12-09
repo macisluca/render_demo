@@ -69,7 +69,7 @@ def transform_date_to_day_first(date_input):
 data = load_all_data()
 
 # Extract available dates and other options
-available_dates = sorted(data['event_date'].unique())[:-12]
+available_dates = sorted(data['event_date'].unique())[:-36]
 default_date = available_dates[-1]
 
 available_variables = sorted([f for f in os.listdir(FORECAST_PATH) if os.path.isdir(os.path.join(FORECAST_PATH, f))], reverse=True)
