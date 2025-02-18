@@ -111,7 +111,10 @@ wdi_df = pd.merge(
 )
 
 # Event Raw Data
-event_data = pd.read_csv('data/last_month_acled.csv')
+event_data = pd.read_csv('data/eddy.csv')
+event_data = event_data.dropna(subset=["latitude", "longitude"], how="all")
+event_data["event_date"] = pd.to_datetime(event_data["date_publish"]).dt.date
+event_data = event_data.dropna(subset=["event_date"])
 available_event_dates = sorted(event_data['event_date'].unique())
 default_event_date = available_event_dates[-1]
 
@@ -151,11 +154,11 @@ navbar = dbc.NavbarSimple(
 
 # Monitoring layout
 monitoring_acled_layout = html.Div([
-    html.H1('Monitoring ACLED Dashboard'),
+    html.H1('Monitoring Events'),
     html.Div(className='container', children=[
         html.H2('Global Daily Events Map'),
         html.H3('Select a date, and the map will display the events that occurred on that day.'),
-        dcc.Dropdown(id='map-date', options=[{'label': transform_date_to_day_first(date), 'value': date} for date in available_event_dates], value=default_event_date, clearable=False, className='dcc-dropdown'),
+        dcc.Dropdown(id='map-date', options=[{'label': date, 'value': date} for date in available_event_dates], value=default_event_date, clearable=False, className='dcc-dropdown'),
         dcc.Graph(id='event-map', className='dcc-graph'),
         html.H2('Ranking by Variable on a weekly basis'),
         dcc.Dropdown(id='ranking-column', options=column_options, value='violence index', clearable=False, className='dcc-dropdown'),
@@ -298,59 +301,62 @@ def display_page(pathname):
 
 # Callback for event map
 @app.callback(
-    [Output('event-map', 'figure')],  # Expecting a list or tuple of outputs
+    Output('event-map', 'figure'),
     [Input('map-date', 'value')]
 )
 
 def update_event_map(selected_date):
+    # Convert selected_date to a date object if it's a string
+    if isinstance(selected_date, str):
+        selected_date = pd.to_datetime(selected_date).date()
+         
     # Filter data for the selected date
-    filtered_df = event_data[event_data['event_date'] == selected_date]
+    filtered_df = event_data[event_data['event_date'] == selected_date].dropna(subset=['latitude', 'longitude'])
 
-    # Group by latitude, longitude, and event_type
-    grouped = filtered_df.groupby(['latitude', 'longitude', 'event_type']).agg(
-        numerosity=('event_type', 'size'),  # Count the number of events in the group
-        fatalities=('fatalities', 'sum'),  # Sum the fatalities for each group
-        actors=('actor1', lambda x: ', '.join(sorted(set(x)))),  # Concatenate unique actor1 values
-        #admin1=('admin1', lambda x: ', '.join(sorted(set(x)))),  # Concatenate unique admin1 values
-        #admin2=('admin2', lambda x: ', '.join(sorted(set(x)))),  # Concatenate unique admin2 values
-        events=('sub_event_type', lambda x: ', '.join(sorted(set(x)))),   # Concatenate unique sub_event_type values
-        description=('notes', lambda x: '/'.join(sorted(set(x)))),   # Concatenate unique notes values
+    # Group by latitude, longitude, and event_type.
+    # For text aggregation, we drop missing values and convert each element to string.
+    grouped = filtered_df.groupby(['latitude', 'longitude', 'event_type'], as_index=False).agg(
+        actors=('actor', lambda x: ', '.join(sorted(map(str, set(x.dropna()))))),
+        recipients=('recipient', lambda x: ', '.join(sorted(map(str, set(x.dropna()))))),
+        description=('description', lambda x: ' / '.join(sorted(map(str, set(x.dropna())))))
     ).reset_index()
 
     # Apply the function to the 'description' column
     grouped['description'] = grouped['description'].apply(add_br_to_description)
-
-    # Generate map with Plotly Express
-    fig = px.scatter_mapbox(grouped,
-                            lat='latitude',
-                            lon='longitude',
-                            size='numerosity',  # Circle size based on count
-                            color='event_type',  # Color based on event_type
-                            hover_name='event_type',
-                            hover_data={'actors': True, 'events': True, 'numerosity': True, 'fatalities':True, 'description':True, 'event_type': False, 'latitude': False, 'longitude': False},
-                            zoom=1.5,
-                            opacity=0.5,
-                            template='plotly_dark')
-
-    # Update map style
-    fig.update_layout(mapbox_style="carto-positron",
-    legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="right",
-        x=1,
-    ))
-
-    # Add ACLED attribution annotation
-    fig.add_annotation(
-        text="Data source: ACLED; accessed November 13th, 2024. See www.acleddata.com for details.",
-        xref="paper", yref="paper",
-        x=0.5, y=-0.1, showarrow=False,
-        font=dict(size=10, color="white")
+    # Create a scatter mapbox plot with color coding based on event_type
+    fig = px.scatter_mapbox(
+        grouped,
+        lat='latitude',
+        lon='longitude',
+        color='event_type',
+        hover_name='event_type',
+        hover_data={
+            'actors': True,
+            'recipients': True,
+            'description': True,
+            'latitude': False,
+            'longitude': False
+        },
+        zoom=2,
+        opacity=0.7,
+        height=600,
+        template='plotly_dark'
     )
 
-    return [fig]
+    # Update map style
+    fig.update_layout(
+        mapbox_style="carto-positron",
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
+    )
+    fig.update_traces(marker=dict(size=10))
+
+    return fig
 
 def add_br_to_description(description):
     # First, add <br><br> after every `/`
@@ -687,7 +693,6 @@ def update_crisis_dropdown(forecast_variable, forecast_window):
     
     return options, default_value
 
-
 # Callback for crisis map
 @app.callback(Output('crisis-world-map', 'figure'),
               [Input('crisis-end-week', 'value'),
@@ -705,3 +710,4 @@ def update_crisis_map(selected_week, selected_variable, selected_window, crisis_
 # Start the app
 if __name__ == '__main__':
     app.run_server(debug=False)
+
