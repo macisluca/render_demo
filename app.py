@@ -101,13 +101,11 @@ def display_page(pathname):
     elif pathname == '/forecasting':
         # You would prepare and pass the necessary arguments for forecasting
         available_variables = ["battles fatalities", "violence index"]  # example list
-        available_windows = ["12", "24", "36"]
         crisis_weeks = list(sorted(crisis_data['end of the week'].unique()))
 
         default_variable = available_variables[0]
-        default_window = available_windows[0]
         crisis_weeks = crisis_weeks[0]
-        return get_forecasting_layout(available_variables, default_variable, available_windows, default_window, crisis_weeks)
+        return get_forecasting_layout(available_variables, default_variable)
     else:
         # Default page
         return get_monitoring_eddy_layout(available_event_dates, default_event_date)
