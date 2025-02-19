@@ -79,7 +79,13 @@ def get_forecasting_layout(available_variables, default_variable):
             value="detailed",
             labelStyle={"display": "inline-block", "margin-right": "20px"}
         ),
+        html.Div([
+                html.P("Detailed View: this mode displays the full distribution of forecast outcomes. If there are many unique values, the data will be binned so that you can see a more granular distribution, allowing you to analyze variations across the entire range."),
+                html.P("Simplified View: this mode aggregates the forecast outcomes into four predefined categories (for example, Mild/Moderate/Intense/Critical for violence index or No/Low/Medium/High Fatalities for battles fatalities) and shows cumulative percentages. It provides a concise summary of the forecast distribution.")],
+                style={'fontSize': 'small', 'color': 'lightgrey', 'marginTop': '10px'}),
         dcc.Graph(id='forecast-bar-plot', className='dcc-graph'),
+        html.H3('Forecast World Map (Simplified):'),
+        dcc.Graph(id='forecast-world-map-simplified', className='dcc-graph'),
         html.Footer(
             [
                 "Modifications from ACLED Data: Violence index calculated based on the paper ",
