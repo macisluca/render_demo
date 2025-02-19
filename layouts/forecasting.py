@@ -36,6 +36,7 @@ def get_forecasting_layout(available_variables, default_variable):
     
     layout = html.Div([
         html.H1('Forecasting Dashboard'),
+        html.Div(className='container', children=[
         html.H2('Global Forecasting'),
         html.H3('Select variable to forecast:'),
         dcc.Dropdown(
@@ -96,6 +97,7 @@ def get_forecasting_layout(available_variables, default_variable):
             ],
             style={'textAlign': 'center', 'fontSize': 'small', 'padding': '10px'}
         ),
+        ]),
     ])
     return layout
 
