@@ -43,7 +43,7 @@ h3 {
 }
 
 .dcc-dropdown > .Select-control {
-    width:100% !important;
+    width:50% !important;
     border: 2px solid rgb(50, 50, 50);
     border-radius:20px;
     background-color: rgb(140, 140, 140);
@@ -51,6 +51,7 @@ h3 {
 
  /* Menu list options */
 .dcc-dropdown > [class*="menu"] {
+    width:50% !important;
     background-color: rgb(140, 140, 140);
     color: rgb(0, 0, 0);
 }
