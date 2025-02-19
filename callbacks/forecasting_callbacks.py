@@ -1,107 +1,180 @@
 import os
 import pandas as pd
+import numpy as np
 import plotly.express as px
 from dash.dependencies import Input, Output
 from app_instance import app
 from utils.data_loader import load_forecast_data, load_crisis_data, load_ISO3_data
 from utils.date_utils import transform_date_to_day_first
 
-FORECAST_HTML_PATH = 'docs/figures/operative/TiDE/'
 
-# Callback for the forecasting slider
+def load_forecast_data(selected_variable, selected_window, selected_country):
+    """
+    Loads forecast CSV data from the specified path.
+    Returns the DataFrame or None if the file cannot be read.
+    """
+    csv_path = os.path.join("models/TiDE/predictions", selected_variable, selected_window, f"{selected_country}.csv")
+    try:
+        df = pd.read_csv(csv_path)
+        return df
+    except Exception as e:
+        print(f"Error loading CSV at {csv_path}: {e}")
+        return None
+
+
+def get_forecast_date_options(df):
+    """
+    Given a DataFrame with a 'forecast' column,
+    returns a sorted list of unique forecast dates as options.
+    """
+    forecasted_dates = sorted(df['forecast'].unique())
+    options = [{'label': date, 'value': date} for date in forecasted_dates]
+    return forecasted_dates, options
+
+
+def generate_detailed_plot(df_filtered, selected_variable, selected_forecast_date):
+    """
+    Generates the detailed bar plot for the filtered forecast data.
+    If the variable is 'violence index', it applies conditional coloring.
+    """
+    max_outcome = int(df_filtered['outcome'].max())
+    x_values = list(range(0, max_outcome + 1))
+    counts = [(np.round(df_filtered['outcome']) == x).sum() for x in x_values]
+    total = df_filtered.shape[0]
+    percentages = [(count / total) * 100 for count in counts]
+    
+    plot_df = pd.DataFrame({
+        'outcome': x_values,
+        'percentage': percentages
+    })
+
+    if selected_variable.lower() == "violence index":
+        # Map outcome value to level synonym
+        def get_level(val):
+            if val < 25:
+                return "Mild"
+            elif val < 50:
+                return "Moderate"
+            elif val < 75:
+                return "Intense"
+            else:
+                return "Critical"
+        plot_df['level'] = plot_df['outcome'].apply(get_level)
+        fig = px.bar(
+            plot_df,
+            x='outcome',
+            y='percentage',
+            color='level',
+            color_discrete_map={
+                "Mild": "green",
+                "Moderate": "yellow",
+                "Intense": "orange",
+                "Critical": "red"
+            },
+            template='plotly_dark',
+            title=f"Forecast Percent Distribution for {selected_forecast_date}"
+        )
+    else:
+        fig = px.bar(
+            plot_df,
+            x='outcome',
+            y='percentage',
+            template='plotly_dark',
+            title=f"Forecast Percent Distribution for {selected_forecast_date}"
+        )
+        fig.update_traces(marker_color='blue')
+
+    fig.update_layout(
+        xaxis_title="Outcome Value",
+        yaxis_title="Percentage (%)"
+    )
+    return fig
+
+
+def generate_simplified_plot(df_filtered, selected_forecast_date):
+    """
+    Generates a simplified bar plot for the 'violence index' variable by grouping
+    outcome values into 4 levels and computing cumulative percentages.
+    """
+    # Define the levels for violence index
+    def get_level(val):
+        if val < 25:
+            return "Mild"
+        elif val < 50:
+            return "Moderate"
+        elif val < 75:
+            return "Intense"
+        else:
+            return "Critical"
+    
+    df_filtered = df_filtered.copy()
+    df_filtered["level"] = df_filtered["outcome"].apply(get_level)
+    level_counts = df_filtered.groupby("level")["outcome"].count()
+    total = df_filtered.shape[0]
+    level_percentages = level_counts / total * 100
+    simple_df = level_percentages.reset_index().rename(columns={"outcome": "percentage"})
+    
+    # Ensure the levels are in a specific order:
+    order = ["Mild", "Moderate", "Intense", "Critical"]
+    simple_df["level"] = pd.Categorical(simple_df["level"], categories=order, ordered=True)
+    simple_df = simple_df.sort_values("level")
+    
+    fig = px.bar(
+        simple_df,
+        x="level",
+        y="percentage",
+        color="level",
+        color_discrete_map={
+            "Mild": "green",
+            "Moderate": "yellow",
+            "Intense": "orange",
+            "Critical": "red"
+        },
+        template="plotly_dark",
+        title=f"Forecast Cumulative Percent Distribution for {selected_forecast_date}"
+    )
+    fig.update_layout(
+        xaxis_title="Violence Index Level",
+        yaxis_title="Percentage (%)"
+    )
+    return fig
+
+
 @app.callback(
-    Output('forecast-slider', 'min'),  # Update the minimum value of the slider
-    Output('forecast-slider', 'max'),  # Update the maximum value of the slider
-    Output('forecast-slider', 'marks'),  # Update the marks of the slider
-    Output('forecast-slider', 'value'),  # Update the default value of the slider
-    Input('forecast-window', 'value')  # Triggered by changes in 'forecast-window'
-)
-def update_forecast_slider(forecast_window):
-
-    forecast_window = int(forecast_window)
-    # Set slider range dynamically based on the forecast window
-    min_value = 0
-    max_value = forecast_window - 1  # Maximum value is window size - 1
-    marks = {i: i+1 for i in range(forecast_window)}  # Generate marks dynamically
-    default_value = 0  # Default to the first week
-
-    return min_value, max_value, marks, default_value
-
-
-
-# Callbacks Forecasting
-@app.callback(
-    [Output('forecast-bar-plot', 'figure'),
-     Output('forecast-world-map', 'figure')],
+    [Output('forecast-date', 'options'),
+     Output('forecast-date', 'value'),
+     Output('forecast-bar-plot', 'figure')],
     [Input('forecast-variable', 'value'),
-    Input('forecast-window', 'value'),
-     Input('forecast-slider', 'value'),
-     Input('percentile-slider', 'value'),
-     Input('num-forecasted-countries', 'value')])
-
-def update_forecasting_dashboard(selected_variable, selected_window, forecast_step, percentile, num_forecasted_countries):
-    forecast_data = load_forecast_data(selected_variable, selected_window)
-    iso3_data = load_ISO3_data()
-    forecast_data = forecast_data.merge(iso3_data[['Country', 'ISO_3166-3']], left_on='country', right_on='Country')
-    forecast_data.rename(columns={'ISO_3166-3': 'ISO_3'}, inplace=True)
-    forecast_data.drop(columns=['Country'], inplace=True)
-    forecast_data = forecast_data[forecast_data['forecast'] == forecast_data['forecast'].unique()[forecast_step]]
-    outcome_percentiles = forecast_data.groupby('ISO_3')['outcome'].quantile(percentile / 100).reset_index()
-    outcome_sorted_percentiles = outcome_percentiles.sort_values(by='outcome', ascending=False).head(num_forecasted_countries)
-
-    forecasted_date = forecast_data['forecast'].unique()[0]
-
-    bar_fig = px.bar(outcome_sorted_percentiles, x='ISO_3', y='outcome', template='plotly_dark', color='outcome', color_continuous_scale='orrd', title=f"Prediction for: {forecasted_date}")
-    bar_fig.update_layout(coloraxis_colorbar_title_text="", )  # Remove color bar title
-
-    map_fig = px.choropleth(outcome_percentiles, locations="ISO_3", color="outcome", hover_name="ISO_3", projection="natural earth", color_continuous_scale=px.colors.sequential.OrRd, template='plotly_dark')
-    map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0), coloraxis_colorbar_title_text="")#paper_bgcolor="#F6F5EC", plot_bgcolor="#F6F5EC"
-    #map_fig.update_geos(fitbounds='locations', visible=False, bgcolor='#F6F5EC')
-    return bar_fig, map_fig
-
-
-# Callbacks for embedding forecast HTML plots
-@app.callback(Output('forecast-line-plot', 'srcDoc'),
-              [Input('forecast-country', 'value'),
-                Input('forecast-variable', 'value'),   # Triggered by changes in 'forecast-variable'
-                Input('forecast-window', 'value') ])
-
-def update_forecast_line_plot(country, forecast_variable, forecast_window):
-    html_file_path = os.path.join(FORECAST_HTML_PATH, forecast_variable, forecast_window, f'{country}.html')
-    with open(html_file_path, 'r') as file:
-        return file.read()
-
-
-# Callback to update crisis_data and crisis_weeks
-@app.callback(
-    Output('crisis-end-week', 'options'),   # Update the options of the 'crisis-end-week' dropdown
-    Output('crisis-end-week', 'value'),    # Update the selected value of the 'crisis-end-week' dropdown
-    Input('forecast-variable', 'value'),   # Triggered by changes in 'forecast-variable'
-    Input('forecast-window', 'value')      # Triggered by changes in 'forecast-window'
+     Input('forecast-window', 'value'),
+     Input('forecast-country', 'value'),
+     Input('forecast-date', 'value'),
+     Input('forecast-display-mode', 'value')]
 )
-def update_crisis_dropdown(forecast_variable, forecast_window):
-    # Load updated crisis data based on the selected variable and window
-    crisis_data = load_crisis_data(forecast_variable, forecast_window)
-    
-    # Update the list of unique crisis weeks
-    crisis_weeks = list(sorted(crisis_data['end of the week'].unique()))
-    
-    # Create dropdown options and default value
-    options = [{'label': transform_date_to_day_first(week), 'value': week} for week in crisis_weeks]
-    default_value = crisis_weeks[0] if crisis_weeks else None
-    
-    return options, default_value
+def update_forecasting_dashboard(selected_variable, selected_window, selected_country, selected_forecast_date, display_mode):
+    # Load the CSV data
+    df = load_forecast_data(selected_variable, selected_window, selected_country)
+    if df is None:
+        return [], None, {}
 
-# Callback for crisis map
-@app.callback(Output('crisis-world-map', 'figure'),
-              [Input('crisis-end-week', 'value'),
-              Input('forecast-variable', 'value'),
-              Input('forecast-window', 'value'),
-               Input('crisis-type', 'value')])
+    # Get forecast date options from the CSV
+    forecasted_dates, forecast_date_options = get_forecast_date_options(df)
+    if selected_forecast_date not in forecasted_dates:
+        selected_forecast_date = forecasted_dates[0] if forecasted_dates else None
 
-def update_crisis_map(selected_week, selected_variable, selected_window, crisis_type):
-    crisis_data = load_crisis_data(selected_variable, selected_window)
-    filtered_data = crisis_data[crisis_data['end of the week'] == selected_week]
-    world_map_fig = px.choropleth(filtered_data, locations="iso3", color=crisis_type, hover_name="country", projection="natural earth", color_continuous_scale=px.colors.sequential.OrRd, template='plotly_dark')
-    world_map_fig.update_layout(autosize=False, margin=dict(l=0, r=0, b=0, t=0), coloraxis_colorbar_title_text="")
-    return world_map_fig
+    # Filter the DataFrame for the selected forecast date
+    df_filtered = df[df['forecast'] == selected_forecast_date]
+
+    # Generate the appropriate plot based on display mode
+    if df_filtered.empty:
+        fig = {}
+    else:
+        if display_mode == "detailed":
+            fig = generate_detailed_plot(df_filtered, selected_variable, selected_forecast_date)
+        else:  # simplified mode
+            if selected_variable.lower() == "violence index":
+                fig = generate_simplified_plot(df_filtered, selected_forecast_date)
+            else:
+                # For non-violence index, fallback to detailed view
+                fig = generate_detailed_plot(df_filtered, selected_variable, selected_forecast_date)
+
+    return forecast_date_options, selected_forecast_date, fig

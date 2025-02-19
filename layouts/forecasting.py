@@ -1,48 +1,96 @@
+import os
+import pandas as pd
 from dash import dcc, html
-import dash_bootstrap_components as dbc
 from utils.date_utils import transform_date_to_day_first
-from utils.data_loader import load_all_data
 
-data = load_all_data()
+def get_country_list(variable, window):
+    # Build the directory path
+    directory = os.path.join("models/TiDE/predictions", variable, window)
+    # List all files that end with '.csv'
+    csv_files = [f for f in os.listdir(directory) if f.endswith('.csv')]
+    # Remove the file extension to get the country names
+    country_names = [os.path.splitext(f)[0] for f in csv_files]
+    country_names.sort()
+    return country_names
 
-# Crisis type dropdown options
-crisis_type_options = [
-    {'label': 'Probability of Extreme Crisis (%)', 'value': 'probability of extreme crisis (%)'},
-    {'label': 'Probability of Severe Crisis (%)', 'value': 'probability of severe crisis (%)'},
-    {'label': 'Probability of Mild Crisis (%)', 'value': 'probability of mild crisis (%)'}
-]
-
-def get_forecasting_layout(available_variables, default_variable, available_windows, default_window, crisis_weeks):
+def get_forecasting_layout(available_variables, default_variable):
+    # Define available windows and a default
+    available_windows = ["daily", "weekly", "monthly"]
+    default_window = "weekly"
+    default_country = 'Afghanistan'
+    countries = get_country_list(default_variable, default_window)
+    
+    # Build the CSV path for default selections:
+    csv_path = os.path.join("models/TiDE/predictions", default_variable, default_window, f"{default_country}.csv")
+    try:
+        df = pd.read_csv(csv_path)
+        forecasted_dates = sorted(df['forecast'].unique())
+    except Exception as e:
+        forecasted_dates = []
+    
+    # Set a default forecast date if available
+    if forecasted_dates:
+        default_forecasted_date = forecasted_dates[0]
+    else:
+        default_forecasted_date = None
+    
     layout = html.Div([
-    html.H1('Forecasting Dashboard'),
-    html.H2('Global Forecasting'),
-    html.H3('Select variable to forecast:'),
-    dcc.Dropdown(id='forecast-variable', options=[{'label': variable, 'value': variable} for variable in available_variables], value=default_variable, clearable=False, className='dcc-dropdown'),
-    html.H3('Select forecasting window:'),
-    dcc.Dropdown(id='forecast-window', options=[{'label': window, 'value': window} for window in available_windows], value=default_window, clearable=False, className='dcc-dropdown'),
-    html.H3('Select forecasted week:'),
-    dcc.Slider(id='forecast-slider', min=0, max=11, step=1, value=0, marks={}),
-    html.H3('Select outcome level: (0 = min outcome predicted, 100 = max outcome predicted)'),
-    dcc.Slider(id='percentile-slider', min=0, max=100, step=1, value=50, marks={i: str(i) for i in range(0, 101, 10)}),
-    dcc.Graph(id='forecast-bar-plot', className='dcc-graph'),
-    html.H3('Select number of countries:'),
-    dcc.Slider(id='num-forecasted-countries', min=10, max=160, step=10, value=10, marks={i: str(i) for i in range(10, 160, 10)}),
-    dcc.Graph(id='forecast-world-map', className='dcc-graph'),
-    html.H2('Select Country Forecasts'),
-    dcc.Dropdown(id='forecast-country', options=[{'label': c, 'value': c} for c in sorted(data['country'].unique())], value='Afghanistan', clearable=False, className='dcc-dropdown'),
-    html.Iframe(id='forecast-line-plot', style={'width': '100%', 'height': '600px'}),
-    html.H2('Crisis Map'),
-    html.H3('The Crisis Map illustrates the likelihood of each country approaching its historical peak of violence, based on past trends and predictive analysis.'),
-    dcc.Dropdown(id='crisis-end-week', options=[{'label': transform_date_to_day_first(week), 'value': week} for week in crisis_weeks], value=crisis_weeks[0], clearable=False, className='dcc-dropdown'),
-    dcc.Dropdown(id='crisis-type', options=crisis_type_options, value='probability of mild crisis (%)', clearable=False, className='dcc-dropdown'),
-    dcc.Graph(id='crisis-world-map', className='dcc-graph'),
-    html.Footer(
-        [
-        "Modifications from ACLED Data: Violence index calculated based on the paper ",
-        html.A("Violence Index: a new data-driven proposal to conflict monitoring", href="https://dx.doi.org/10.4995/CARMA2024.2024.17831", target="_blank"),
-        ],
-    style={'textAlign': 'center', 'fontSize': 'small', 'padding': '10px'}
-    ),
-])
+        html.H1('Forecasting Dashboard'),
+        html.H2('Global Forecasting'),
+        html.H3('Select variable to forecast:'),
+        dcc.Dropdown(
+            id='forecast-variable',
+            options=[{'label': var, 'value': var} for var in available_variables],
+            value=default_variable,
+            clearable=False,
+            className='dcc-dropdown'
+        ),
+        html.H3('Select daily/weekly/monthly forecasts:'),
+        dcc.Dropdown(
+            id='forecast-window',
+            options=[{'label': win, 'value': win} for win in available_windows],
+            value=default_window,
+            clearable=False,
+            className='dcc-dropdown'
+        ),
+        html.H3('Select country to forecast:'),
+        dcc.Dropdown(
+            id='forecast-country',
+            options=[{'label': c, 'value': c} for c in countries],
+            value=default_country,
+            clearable=False,
+            className='dcc-dropdown'
+        ),
+        html.H3('Select forecasted date:'),
+        dcc.Dropdown(
+            id='forecast-date',
+            options=[{'label': date, 'value': date} for date in forecasted_dates],
+            value=default_forecasted_date,
+            clearable=False,
+            className='dcc-dropdown'
+        ),
+        html.H3('Select display mode:'),
+        dcc.RadioItems(
+            id="forecast-display-mode",
+            options=[
+                {"label": "Detailed", "value": "detailed"},
+                {"label": "Simplified", "value": "simplified"}
+            ],
+            value="detailed",
+            labelStyle={"display": "inline-block", "margin-right": "20px"}
+        ),
+        dcc.Graph(id='forecast-bar-plot', className='dcc-graph'),
+        html.Footer(
+            [
+                "Modifications from ACLED Data: Violence index calculated based on the paper ",
+                html.A(
+                    "Violence Index: a new data-driven proposal to conflict monitoring",
+                    href="https://dx.doi.org/10.4995/CARMA2024.2024.17831", target="_blank"
+                ),
+            ],
+            style={'textAlign': 'center', 'fontSize': 'small', 'padding': '10px'}
+        ),
+    ])
     return layout
+
 
