@@ -5,7 +5,7 @@ navbar = dbc.NavbarSimple(
     children=[
         dbc.DropdownMenu(
             children=[
-                dbc.DropdownMenuItem("Monitoring EDDY Events", href="/monitoring/eddy"),
+                dbc.DropdownMenuItem("Monitoring ED             ©DY Events", href="/monitoring/eddy"),
                 dbc.DropdownMenuItem("Monitoring ACLED", href="/monitoring/acled"),
                 dbc.DropdownMenuItem("Monitoring World Bank Data", href="/monitoring/worldbank"),
                 dbc.DropdownMenuItem("Monitoring Elections Calendar", href="/monitoring/elections"),

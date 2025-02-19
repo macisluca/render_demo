@@ -1,7 +1,5 @@
 from dash import dcc, html, dash_table
 from utils.date_utils import transform_date_to_day_first
-from utils.data_loader import load_WDI_data
-
 
 def get_monitoring_eddy_layout(available_event_dates, default_event_date):
     layout = html.Div([
@@ -51,36 +49,54 @@ def get_monitoring_acled_layout(available_event_dates, default_event_date, avail
     return layout
 
 
-wdi_df = load_WDI_data()
-
-def get_monitoring_worldbank_layout():
-    """
-    Returns the layout for the Monitoring World Bank Data Dashboard.
+def get_monitoring_worldbank_layout(wdi_data):
+    default_theme = "Economic"
+    default_df = wdi_data[default_theme]
     
-    :param wdi_df: A pandas DataFrame containing the World Bank data.
-                   Expected to have columns like 'Country', 'ISO_3', 'year', etc.
-    """
+    # Since there is no "Country" column, we use "ISO_3" as the key
+    country_col = "ISO_3"
     # Exclude non-numeric or identifier columns for ranking selection
-    excluded_cols = ['ISO_3', 'ISO_3166-3', 'Country', 'year']
-    dropdown_options = [{'label': col, 'value': col} 
-                        for col in wdi_df.columns if col not in excluded_cols]
-
+    excluded_cols = ['ISO_3', 'ISO_3166-3', 'year']
+    variable_options = [{'label': col, 'value': col} 
+                        for col in default_df.columns if col not in excluded_cols]
+    
     layout = html.Div([
         html.H1('Monitoring World Bank Data Dashboard'),
         html.Div(className='container', children=[
+            html.H3('Select Theme:'),
+            dcc.Dropdown(
+                id='wb-theme',
+                options=[{'label': theme, 'value': theme} for theme in sorted(wdi_data.keys())],
+                value=default_theme,
+                clearable=False,
+                className='dcc-dropdown'
+            ),
+            html.H3('Select Data Mode:'),
+            dcc.RadioItems(
+                id='wb-data-mode',
+                options=[
+                    {"label": "Original Data", "value": "original"},
+                    {"label": "Imputed Data", "value": "filled"}
+                ],
+                value="original",
+                labelStyle={"display": "inline-block", "margin-right": "20px"}
+            ),
+            html.Div([
+                html.P("Original Data: This dataset contains the raw values as reported by the World Bank. It reflects the actual reported measurements, including any missing or incomplete entries. Analyzing the original data allows you to see the data in its unaltered form, though you may need to account for gaps in the information."),
+                html.P("Imputed Data: This dataset has been processed using imputation techniques to fill in missing values, resulting in a complete dataset. While imputation provides a more seamless data series for analysis, please note that the imputed values are statistical estimates and may differ from the originally reported figures.")],
+                style={'fontSize': 'small', 'color': 'lightgrey', 'marginTop': '10px'}),
             html.H2('Ranking by Variable on an Annual Basis'),
             dcc.Dropdown(
                 id='wb-ranking-column',
-                options=dropdown_options,
-                # Default to the third column if available
-                value=dropdown_options[2]['value'] if len(dropdown_options) >= 3 else None,
+                options=variable_options,
+                value=variable_options[0]['value'] if variable_options else None,
                 clearable=False,
                 className='dcc-dropdown'
             ),
             dcc.Dropdown(
                 id='wb-ranking-year',
-                options=[],  # Will be populated dynamically via callbacks
-                value=None,  # Default value set dynamically
+                options=[],  
+                value=None,
                 clearable=False,
                 className='dcc-dropdown'
             ),
@@ -89,15 +105,16 @@ def get_monitoring_worldbank_layout():
             dcc.Slider(
                 id='wb-num-countries',
                 min=10,
-                max=len(wdi_df['Country'].unique()),
+                max=len(default_df[country_col].unique()),
                 step=10,
                 value=10,
-                marks={i: str(i) for i in range(10, len(wdi_df['Country'].unique()) + 10, 10)}
+                marks={i: str(i) for i in range(10, len(default_df[country_col].unique()) + 10, 10)}
             ),
             dcc.Graph(id='wb-world-map', className='dcc-graph')
         ])
     ])
     return layout
+
 
 
 def get_monitoring_elections_layout(elections_df):

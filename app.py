@@ -14,7 +14,8 @@ from utils.data_loader import (
     load_crisis_data,
     load_electoral_data,
     load_event_data,
-    load_ACLED_event_data
+    load_ACLED_event_data,
+    load_WDI_data
 )
 
 import os
@@ -66,6 +67,9 @@ acled_event_data = load_ACLED_event_data()
 available_acled_event_dates = sorted(acled_event_data['event_date'].unique())
 default_acled_event_date = available_acled_event_dates[-1]
 
+# Load WDI data
+wdi_data = load_WDI_data()
+
 # Build a dictionary to pass into layout functions if needed
 layout_args = {
     'available_event_dates': available_acled_event_dates,
@@ -95,7 +99,7 @@ def display_page(pathname):
     elif pathname == '/monitoring/acled':
         return get_monitoring_acled_layout(**layout_args)
     elif pathname == '/monitoring/worldbank':
-        return get_monitoring_worldbank_layout()
+        return get_monitoring_worldbank_layout(wdi_data)
     elif pathname == '/monitoring/elections':
         return get_monitoring_elections_layout(elections_df)
     elif pathname == '/forecasting':
@@ -116,8 +120,6 @@ import callbacks.monitoring_callbacks as mc
 import callbacks.worldbank_callbacks as wc
 import callbacks.forecasting_callbacks as fc
 import callbacks.elections_callbacks as ec
-
-print("🔍 Registered callbacks:", app.callback_map.keys())  # DEBUG
 
 if __name__ == '__main__':
     app.run_server(debug=True)

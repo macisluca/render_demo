@@ -49,18 +49,31 @@ def load_ACLED_event_data(acled_path='data/last_month_acled.csv'):
     return pd.read_csv(acled_path)
 
 
-def load_WDI_data(directory_wdi = "data/WDI/"):
-    # List all CSV files in the directory
-    csv_files = [os.path.join(directory_wdi, file) for file in os.listdir(directory_wdi) if file.endswith('.csv')]
-    # Concatenate all CSV files into a single DataFrame
-    wdi_raw_df = pd.concat([pd.read_csv(file) for file in csv_files], ignore_index=True)
-    acled_coverage_iso3_df = pd.read_csv("data/raw/ACLED_coverage_ISO3.csv")
-    # Merge to add the "Country" column
-    wdi_df = pd.merge(
-        wdi_raw_df,
-        acled_coverage_iso3_df[['ISO_3166-3', 'Country']],
-        how='left',
-        left_on='ISO_3',
-        right_on='ISO_3166-3'
-    )
-    return wdi_df
+def load_WDI_data(mode="original"):
+    """
+    Loads WDI data for each theme.
+    If mode is "filled", loads the imputed data (files with "Filled" in the name).
+    If mode is "original", loads the original data.
+    Returns a dict mapping theme names to DataFrames.
+    """
+    base_path = "data/WDI"
+    # Construct file names based on mode
+    themes = {
+        "Economic": f"WDI_{'Filled_' if mode=='filled' else 'Selected_'}Economic.csv",
+        "Education": f"WDI_{'Filled_' if mode=='filled' else 'Selected_'}Education.csv",
+        "Social": f"WDI_{'Filled_' if mode=='filled' else 'Selected_'}Social.csv",
+        "Gender": f"WDI_{'Filled_' if mode=='filled' else 'Selected_'}Gender.csv",
+        "Health": f"WDI_{'Filled_' if mode=='filled' else 'Selected_'}Health.csv"
+    }
+    data_dict = {}
+    for theme, filename in themes.items():
+        full_path = os.path.join(base_path, filename)
+        try:
+            df = pd.read_csv(full_path)
+            data_dict[theme] = df
+        except Exception as e:
+            print(f"Error loading {full_path}: {e}")
+            data_dict[theme] = pd.DataFrame()
+    return data_dict
+
+
