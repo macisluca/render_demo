@@ -300,12 +300,30 @@ def generate_simplified_plot(df_filtered, selected_forecast_date, selected_varia
 
 @app.callback(
     [Output('forecast-date', 'options'),
-     Output('forecast-date', 'value'),
-     Output('forecast-bar-plot', 'figure')],
+     Output('forecast-date', 'value')],
     [Input('forecast-variable', 'value'),
      Input('forecast-window', 'value'),
+     Input('forecast-date', 'value')]
+)
+def update_forecasting_global_dashboard(selected_variable, selected_window, selected_forecast_date):
+    # Load the CSV data using the wrapper function.
+    df = load_forecast_data_wrapper(selected_variable, selected_window, 'Afghanistan')
+    if df is None:
+        return [], None, {}
+    forecasted_dates, forecast_date_options = get_forecast_date_options(df)
+    if selected_forecast_date not in forecasted_dates:
+        selected_forecast_date = forecasted_dates[0] if forecasted_dates else None  
+    return forecast_date_options, selected_forecast_date
+
+
+@app.callback(
+    [Output('forecast-date-country', 'options'),
+     Output('forecast-date-country', 'value'),
+     Output('forecast-bar-plot', 'figure')],
+    [Input('forecast-variable-country', 'value'),
+     Input('forecast-window-country', 'value'),
      Input('forecast-country', 'value'),
-     Input('forecast-date', 'value'),
+     Input('forecast-date-country', 'value'),
      Input('forecast-display-mode', 'value')]
 )
 def update_forecasting_dashboard(selected_variable, selected_window, selected_country, selected_forecast_date, display_mode):
@@ -325,7 +343,6 @@ def update_forecasting_dashboard(selected_variable, selected_window, selected_co
         else:
             fig = generate_simplified_plot(df_filtered, selected_forecast_date, selected_variable)
     return forecast_date_options, selected_forecast_date, fig
-
 
 
 @app.callback(
@@ -393,3 +410,139 @@ def update_forecast_world_map_simplified(selected_variable, selected_window, sel
         title=f"Forecast Simplified Majority Category for {selected_forecast_date}"
     )
     return fig
+
+
+@app.callback(
+    [Output('simplified-category', 'options'),
+     Output('simplified-category', 'value')],
+    [Input('forecast-variable', 'value')]
+)
+def update_simplified_category_options(selected_variable):
+    if selected_variable is None:
+        return [], None
+    var = selected_variable.lower().strip()
+    if var == "violence index":
+        options = [
+            {"label": "Mild", "value": "Mild"},
+            {"label": "Moderate", "value": "Moderate"},
+            {"label": "Intense", "value": "Intense"},
+            {"label": "Critical", "value": "Critical"}
+        ]
+        default_value = "Critical"
+    elif var == "battles fatalities":
+        options = [
+            {"label": "No Fatalities", "value": "No Fatalities"},
+            {"label": "Low Fatalities", "value": "Low Fatalities"},
+            {"label": "Medium Fatalities", "value": "Medium Fatalities"},
+            {"label": "High Fatalities", "value": "High Fatalities"}
+        ]
+        default_value = "High Fatalities"
+    else:
+        # For other variables, we might not have a simplified category.
+        options = []
+        default_value = None
+    return options, default_value
+
+
+def compute_category_probability(df, selected_variable, chosen_category):
+    """
+    Computes the percentage of rows in df whose outcome falls into the chosen simplified category.
+    """
+    var = selected_variable.lower().strip()
+    if var == "violence index":
+        def get_level(val):
+            if val < 25:
+                return "Mild"
+            elif val < 50:
+                return "Moderate"
+            elif val < 75:
+                return "Intense"
+            else:
+                return "Critical"
+        df = df.copy()
+        df["level"] = df["outcome"].apply(get_level)
+        prob = (df["level"] == chosen_category).mean() * 100
+        return prob
+    elif var == "battles fatalities":
+        def get_battle_category(val):
+            if val == 0:
+                return "No Fatalities"
+            elif val <= 10:
+                return "Low Fatalities"
+            elif val <= 50:
+                return "Medium Fatalities"
+            else:
+                return "High Fatalities"
+        df = df.copy()
+        df["category"] = df["outcome"].apply(get_battle_category)
+        prob = (df["category"] == chosen_category).mean() * 100
+        return prob
+    else:
+        return None
+
+
+
+@app.callback(
+    Output('forecast-bar-plot-simplified', 'figure'),
+    [Input('forecast-variable', 'value'),
+     Input('forecast-window', 'value'),
+     Input('forecast-date', 'value'),
+     Input('simplified-category', 'value'),
+     Input('num-countries-bar-forecast', 'value')]
+)
+def update_forecast_bar_plot_simplified(selected_variable, selected_window, selected_forecast_date, chosen_category, num_countries):
+    iso_df = load_ISO3_data()  # Should return a DataFrame with at least "Country" and "ISO_3"
+    results = []
+    for idx, row in iso_df.iterrows():
+        country_name = row["Country"]
+        iso3 = row["ISO_3166-3"]
+        csv_path = os.path.join("models/TiDE/predictions", selected_variable, selected_window, f"{country_name}.csv")
+        try:
+            df_country = pd.read_csv(csv_path)
+        except Exception as e:
+            continue
+        # Filter by the selected forecast date
+        df_country = df_country[df_country["forecast"] == selected_forecast_date]
+        if df_country.empty:
+            continue
+        prob = compute_category_probability(df_country, selected_variable, chosen_category)
+        if prob is not None:
+            results.append({"Country": country_name, "ISO_3": iso3, "Probability": prob})
+    if not results:
+        return {}
+    results_df = pd.DataFrame(results)
+    results_df = results_df.sort_values(by="Probability", ascending=False).head(num_countries)
+    fig = px.bar(
+        results_df,
+        x="Country",
+        y="Probability",
+        color="Probability",
+        color_continuous_scale='orrd',
+        template="plotly_dark",
+        title=f"Probability of {chosen_category} on {selected_forecast_date}"
+    )
+    fig.update_layout(xaxis_title="Country", yaxis_title="Probability (%)")
+    return fig
+
+@app.callback(
+    Output('simplified-category-explanation', 'children'),
+    [Input('forecast-variable', 'value')]
+)
+def update_category_explanation(selected_variable):
+    if selected_variable is None:
+        return ""
+    var = selected_variable.lower().strip()
+    if var == "violence index":
+        return (
+            "For Violence Index: "
+            "Mild (<25), Moderate (25-50), Intense (50-75), Critical (>75)."
+        )
+    elif var == "battles fatalities":
+        return (
+            "For Battles Fatalities: "
+            "No Fatalities (=0), Low Fatalities (>0 and <=10), "
+            "Medium Fatalities (>10 and <=50), High Fatalities (>50)."
+        )
+    else:
+        return "No simplified categories available for this variable."
+

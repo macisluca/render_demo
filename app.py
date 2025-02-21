@@ -8,7 +8,10 @@ from layouts.monitoring import (
     get_monitoring_worldbank_layout,
     get_monitoring_elections_layout
 )
-from layouts.forecasting import get_forecasting_layout
+from layouts.forecasting import (
+    get_forecasting_global_layout,
+    get_forecasting_country_layout
+    )
 from utils.data_loader import (
     load_all_data,
     load_crisis_data,
@@ -81,6 +84,13 @@ layout_args = {
     'column_options': column_options
 }
 
+# You would prepare and pass the necessary arguments for forecasting
+available_variables = ["battles fatalities", "violence index"]  # example list
+crisis_weeks = list(sorted(crisis_data['end of the week'].unique()))
+
+default_variable = available_variables[0]
+crisis_weeks = crisis_weeks[0]
+
 # Main layout with page routing
 app.layout = html.Div([
     dcc.Location(id="url"),
@@ -102,14 +112,11 @@ def display_page(pathname):
         return get_monitoring_worldbank_layout(wdi_data)
     elif pathname == '/monitoring/elections':
         return get_monitoring_elections_layout(elections_df)
-    elif pathname == '/forecasting':
-        # You would prepare and pass the necessary arguments for forecasting
-        available_variables = ["battles fatalities", "violence index"]  # example list
-        crisis_weeks = list(sorted(crisis_data['end of the week'].unique()))
-
-        default_variable = available_variables[0]
-        crisis_weeks = crisis_weeks[0]
-        return get_forecasting_layout(available_variables, default_variable)
+    elif pathname == '/forecasting/global':
+        return get_forecasting_global_layout(available_variables, default_variable)
+    elif pathname == '/forecasting/country':
+        return get_forecasting_country_layout(available_variables, default_variable)
+    
     else:
         # Default page
         return get_monitoring_eddy_layout(available_event_dates, default_event_date)

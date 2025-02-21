@@ -5,7 +5,7 @@ navbar = dbc.NavbarSimple(
     children=[
         dbc.DropdownMenu(
             children=[
-                dbc.DropdownMenuItem("Monitoring ED             ©DY Events", href="/monitoring/eddy"),
+                dbc.DropdownMenuItem("Monitoring EDDY Events", href="/monitoring/eddy"),
                 dbc.DropdownMenuItem("Monitoring ACLED", href="/monitoring/acled"),
                 dbc.DropdownMenuItem("Monitoring World Bank Data", href="/monitoring/worldbank"),
                 dbc.DropdownMenuItem("Monitoring Elections Calendar", href="/monitoring/elections"),
@@ -14,7 +14,15 @@ navbar = dbc.NavbarSimple(
             in_navbar=True,
             label="Monitoring",
         ),
-        dbc.NavItem(dbc.NavLink("Forecasting", href="/forecasting")),
+        dbc.DropdownMenu(
+            children=[
+                dbc.DropdownMenuItem("Forecasting Global", href="/forecasting/global"),
+                dbc.DropdownMenuItem("Forecasting per Country", href="/forecasting/country"),
+            ],
+            nav=True,
+            in_navbar=True,
+            label="Forecasting",
+        ),
     ],
     brand="Dashboard",
     brand_href="/",
