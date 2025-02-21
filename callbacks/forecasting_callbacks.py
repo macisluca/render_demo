@@ -98,7 +98,7 @@ def generate_detailed_plot(df_filtered, selected_variable, selected_forecast_dat
                 color='category',
                 color_discrete_map=color_map,
                 template='plotly_dark',
-                title=f"Forecast Percent Distribution for {selected_forecast_date}"
+                title=f"Forecast Probability Distribution for {selected_forecast_date}"
             )
         else:
             fig = px.bar(
@@ -106,9 +106,9 @@ def generate_detailed_plot(df_filtered, selected_variable, selected_forecast_dat
                 x='bin',
                 y='percentage',
                 template='plotly_dark',
-                title=f"Forecast Percent Distribution for {selected_forecast_date}"
+                title=f"Forecast Probability Distribution for {selected_forecast_date}"
             )
-        fig.update_layout(xaxis_title="Outcome Range", yaxis_title="Percentage (%)")
+        fig.update_layout(xaxis_title="Outcome Range", yaxis_title="Probability (%)")
         return fig
 
     else:
@@ -147,7 +147,7 @@ def generate_detailed_plot(df_filtered, selected_variable, selected_forecast_dat
                     "Critical": "red"
                 },
                 template='plotly_dark',
-                title=f"Forecast Percent Distribution for {selected_forecast_date}"
+                title=f"Forecast Probability Distribution for {selected_forecast_date}"
             )
         elif selected_variable.lower().strip() == "battles fatalities":
             def get_battle_category(val):
@@ -173,7 +173,7 @@ def generate_detailed_plot(df_filtered, selected_variable, selected_forecast_dat
                 color='category',
                 color_discrete_map=color_map,
                 template='plotly_dark',
-                title=f"Forecast Percent Distribution for {selected_forecast_date}"
+                title=f"Forecast Probability Distribution for {selected_forecast_date}"
             )
         else:
             fig = px.bar(
@@ -181,10 +181,10 @@ def generate_detailed_plot(df_filtered, selected_variable, selected_forecast_dat
                 x='outcome',
                 y='percentage',
                 template='plotly_dark',
-                title=f"Forecast Percent Distribution for {selected_forecast_date}"
+                title=f"Forecast Probability Distribution for {selected_forecast_date}"
             )
             fig.update_traces(marker_color='blue')
-        fig.update_layout(xaxis_title="Outcome Value", yaxis_title="Percentage (%)")
+        fig.update_layout(xaxis_title="Outcome Value", yaxis_title="Probability (%)")
         return fig
 
 
@@ -232,12 +232,12 @@ def generate_simplified_plot(df_filtered, selected_forecast_date, selected_varia
             color="category",
             color_discrete_map=color_map,
             template="plotly_dark",
-            title=f"Forecast Cumulative Percent Distribution for {selected_forecast_date}"
+            title=f"Forecast Cumulative Probability Distribution for {selected_forecast_date}"
         )
         # Convert counts to percentages:
         fig.update_layout(
             xaxis_title="Battles Fatalities Category",
-            yaxis_title="Percentage (%)"
+            yaxis_title="Probability (%)"
         )
         # Alternatively, compute percentages beforehand:
         simple_df["percentage"] = simple_df["outcome"]
@@ -248,11 +248,11 @@ def generate_simplified_plot(df_filtered, selected_forecast_date, selected_varia
             color="category",
             color_discrete_map=color_map,
             template="plotly_dark",
-            title=f"Forecast Cumulative Percent Distribution for {selected_forecast_date}"
+            title=f"Forecast Cumulative Probability Distribution for {selected_forecast_date}"
         )
         fig.update_layout(
             xaxis_title="Battles Fatalities Category",
-            yaxis_title="Percentage (%)"
+            yaxis_title="Probability (%)"
         )
         return fig
     elif selected_variable.lower().strip() == "violence index":
@@ -286,12 +286,12 @@ def generate_simplified_plot(df_filtered, selected_forecast_date, selected_varia
                 "Critical": "red"
             },
             template="plotly_dark",
-            title=f"Forecast Cumulative Percent Distribution for {selected_forecast_date}"
+            title=f"Forecast Cumulative Probability Distribution for {selected_forecast_date}"
         )
         # If needed, update layout titles:
         fig.update_layout(
             xaxis_title="Violence Index Level",
-            yaxis_title="Percentage (%)"
+            yaxis_title="Probability (%)"
         )
         return fig
     else:
