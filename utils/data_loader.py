@@ -1,14 +1,13 @@
 import os
 import pandas as pd
 
-DATA_PATH = 'data/interim/data_ready/'
+DATA_PATH = 'data/processed/'
 FORECAST_PATH = 'models/TiDE/predictions/'
 ISO3_PATH = 'data/raw/ACLED_coverage_ISO3.csv'
 
-def load_all_data():
-    files = [f for f in os.listdir(DATA_PATH) if f.endswith('.csv')]
-    dfs = [pd.read_csv(os.path.join(DATA_PATH, file)) for file in files]
-    return pd.concat(dfs, ignore_index=True)
+def load_all_data(freq):
+    df = pd.read_parquet(os.path.join(DATA_PATH,freq,'ACLED_final.parquet'))
+    return df
 
 def load_forecast_data(variable, window):
     folder_path = os.path.join(FORECAST_PATH, variable, window)
