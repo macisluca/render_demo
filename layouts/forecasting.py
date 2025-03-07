@@ -19,7 +19,7 @@ def get_forecasting_global_layout(available_variables, default_variable):
     # Define available windows and a default
     available_windows = ["daily", "weekly", "monthly"]
     default_window = "weekly"
-    default_country = 'Afghanistan'
+    default_country = 'AFG'
     
     # Build the CSV path for default selections:
     csv_path = os.path.join("models/TiDE/predictions", default_variable, default_window, f"{default_country}.csv")
