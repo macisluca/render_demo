@@ -1,5 +1,6 @@
 from dash import dcc, html, dash_table
 from utils.date_utils import transform_date_to_day_first
+from utils.data_loader import load_all_data
 
 def get_monitoring_eddy_layout(available_event_dates, default_event_date):
     layout = html.Div([
@@ -13,39 +14,95 @@ def get_monitoring_eddy_layout(available_event_dates, default_event_date):
     ])
     return layout
 
-# Assume that data like `available_event_dates`, `default_event_date`, etc. have been loaded in app.py
-def get_monitoring_acled_layout(available_event_dates, default_event_date, available_dates, default_date, data, crisis_weeks, column_options):
+
+def get_monitoring_acled_layout(frequencies):
+
+    # Load initial data using a default frequency (e.g., "daily")
+    data = load_all_data("daily")
+    available_dates = sorted(data['event_date'].unique())
+    default_date = available_dates[-1] if available_dates else None
+    unavailable_cols = [
+        'event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon',
+        'month', 'quarter', 'week', 'violence index_exp_moving_avg', 'General',
+        'Legislative', 'Local', 'Parliamentary', 'Presidential', 'Referendum', 'holiday'
+    ]
+    column_options = [{'label': col, 'value': col} for col in data.columns if col not in unavailable_cols]
+    country_options = [{'label': c, 'value': c} for c in sorted(data['country'].unique())]
+
     layout = html.Div([
-    html.H1('Monitoring ACLED Events'),
-    html.Div(className='container', children=[
-        html.H2('Global Daily Events Map'),
-        html.H3('Select a date, and the map will display the events that occurred on that day.'),
-        dcc.Dropdown(id='acled-map-date', options=[{'label': date, 'value': date} for date in available_event_dates], value=default_event_date, clearable=False, className='dcc-dropdown'),
-        dcc.Graph(id='acled-event-map', className='dcc-graph'),
-        html.H2('Ranking by Variable on a weekly basis'),
-        dcc.Dropdown(id='ranking-column', options=column_options, value='violence index', clearable=False, className='dcc-dropdown'),
-        dcc.Dropdown(id='ranking-date', options=[{'label': transform_date_to_day_first(date), 'value': date} for date in available_dates], value=default_date, clearable=False, className='dcc-dropdown'),
-        dcc.Graph(id='bar-plot', className='dcc-graph'),
-        html.H3('Select number of countries:'),
-        dcc.Slider(id='num-countries', min=10, max=235, step=10, value=10, marks={i: str(i) for i in range(10, 236, 10)}),
-        dcc.Graph(id='world-map', className='dcc-graph'),
-        html.H2('Countries Weekly Stats Over Time'),
-        dcc.Dropdown(id='evolution-column', options=column_options, value='violence index', clearable=False, className='dcc-dropdown'),
-        dcc.Dropdown(id='evolution-country', options=[{'label': c, 'value': c} for c in sorted(data['country'].unique())], value=['Afghanistan'], multi=True, clearable=False, className='dcc-dropdown'),
-        dcc.Graph(id='line-plot', className='dcc-graph'),
-        dcc.Dropdown(id='plot-date', options=[{'label': transform_date_to_day_first(date), 'value': date} for date in available_dates], value=default_date, clearable=False, className='dcc-dropdown'),
-        dash_table.DataTable(id='data-table',
-            style_data={'color': 'white','backgroundColor': 'rgb(50, 50, 50)'},
-            style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white', 'fontWeight': 'bold'},
-            style_cell={'textAlign': 'left', 'height': 'auto', 'minWidth': '90px', 'width': '180px', 'maxWidth': '180px', 'whiteSpace': 'normal'},
-            # Add conditional styling for rows with "violence index"
-            style_data_conditional=[
-                {'if': {'filter_query': '{Country} contains "index"'},
-                 'color':'rgb(255, 200, 200)','backgroundColor': 'rgb(60, 50, 50)'}
-                 ]
+        html.H1('Explore Events', style={'textAlign': 'center'}),
+        html.Div([
+            html.Div([
+                dcc.Dropdown(
+                    id='ranking-column',
+                    options=column_options,
+                    value='violence index',
+                    clearable=False,
+                    className='dcc-dropdown'
+                ),
+                dcc.Dropdown(
+                    id='evolution-country',
+                    options=country_options,
+                    value=['Afghanistan'],
+                    multi=True,
+                    clearable=False,
+                    className='dcc-dropdown'
+                ),
+            ], style={'flex': '1', 'padding': '10px'}),
+            html.Div([
+                dcc.Dropdown(
+                    id='ranking-date',
+                    options=[{'label': date, 'value': date} for date in available_dates],
+                    value=default_date,
+                    clearable=False,
+                    className='dcc-dropdown'
+                ),
+                dcc.Dropdown(
+                    id='frequency',
+                    options=[{'label': freq, 'value': freq} for freq in frequencies],
+                    value="daily",
+                    clearable=False,
+                    className='dcc-dropdown'
+                ),
+            ], style={'flex': '1', 'padding': '10px'}),
+        ], style={'display': 'flex', 'width': '100%', 'gap': '20px'}),
+        html.Div(
+            id='selected-countries-text',
+            style={'textAlign': 'center', 'padding': '5px', 'fontSize': '16px'}
         ),
-        ]),
-    ])
+        html.Div([
+            html.Div([
+                dcc.Graph(id='bar-plot', className='dcc-graph'),
+            ], style={'flex': '1', 'padding': '5px'}),
+            html.Div([
+                dcc.Graph(id='world-map', className='dcc-graph'),
+            ], style={'flex': '1', 'padding': '5px'}),
+            html.Div([
+                dcc.Graph(id='line-plot', className='dcc-graph'),
+            ], style={'flex': '1', 'padding': '5px'}),
+        ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%', 'gap': '5px'}),
+        html.Div([
+            dash_table.DataTable(
+                id='data-table',
+                style_data={'color': 'white', 'backgroundColor': 'rgb(50, 50, 50)'},
+                style_header={
+                    'backgroundColor': 'rgb(30, 30, 30)',
+                    'color': 'white',
+                    'fontWeight': 'bold'
+                },
+                style_cell={
+                    'textAlign': 'left',
+                    'height': 'auto',
+                    'minWidth': '90px',
+                    'width': '180px',
+                    'maxWidth': '180px',
+                    'whiteSpace': 'normal'
+                },
+                style_data_conditional=[]
+            ),
+        ], style={'width': '100%', 'padding': '10px'})
+    ], style={'width': '99%', 'margin': '0 auto'})
+    
     return layout
 
 

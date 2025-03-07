@@ -1,18 +1,70 @@
 import pandas as pd
 import numpy as np
-import os
+import json
 import plotly.express as px
+import plotly.graph_objects as go
 from dash.dependencies import Input, Output
-from datetime import datetime, timedelta
-from utils.date_utils import transform_date_to_day_first, add_br_to_description
+from dash import html
+from utils.date_utils import add_br_to_description
 from app_instance import app
 from utils.data_loader import (
     load_all_data,
     load_event_data, 
     load_ACLED_event_data,
+    load_ISO3_data,
     DATA_PATH
 )
 
+
+@app.callback(
+    Output('selected-countries-text', 'children'),
+    [Input('evolution-country', 'value')]
+)
+def update_selected_countries_text(selected_countries):
+    if not selected_countries:
+        return ""
+
+    # Use a Plotly qualitative color sequence for consistent colors
+    color_sequence = px.colors.qualitative.Plotly
+
+    children = []
+    for i, country in enumerate(selected_countries):
+        color = color_sequence[i % len(color_sequence)]
+        children.append(html.Span(country, style={'color': color, 'fontWeight': 'bold'}))
+        if i < len(selected_countries) - 1:
+            # Append comma and space between countries
+            children.append(html.Span(', ', style={'color': '#ccc'}))
+    return children
+
+
+# Callback to update dropdown options when frequency is changed
+@app.callback(
+    [Output('ranking-date', 'options'),
+     Output('ranking-date', 'value'),
+     Output('ranking-column', 'options'),
+     Output('evolution-country', 'options')],
+    [Input('frequency', 'value')]
+)
+def update_options_on_frequency(selected_freq):
+    # Reload data based on the selected frequency
+    data = load_all_data(selected_freq)
+    available_dates = sorted(data['event_date'].unique())
+    default_date = available_dates[-1] if available_dates else None
+
+    # Update column options (and remove the unavailable ones)
+    unavailable_cols = [
+        'event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon',
+        'month', 'quarter', 'week', 'violence index_exp_moving_avg', 'General',
+        'Legislative', 'Local', 'Parliamentary', 'Presidential', 'Referendum', 'holiday'
+    ]
+    column_options = [{'label': col, 'value': col} for col in data.columns if col not in unavailable_cols]
+    
+    # Update country options
+    country_options = [{'label': c, 'value': c} for c in sorted(data['country'].unique())]
+    # Update date dropdown options
+    date_options = [{'label': date, 'value': date} for date in available_dates]
+    
+    return date_options, default_date, column_options, country_options
 
 event_data = load_event_data()
 acled_event_data = load_ACLED_event_data()
@@ -76,15 +128,21 @@ def update_event_map(selected_date):
     return fig
 
 
-# Callback for ACLED event map
-@app.callback(
-    [Output('acled-event-map', 'figure')],  # Expecting a list or tuple of outputs
-    [Input('acled-map-date', 'value')]
-)
+iso3_data = load_ISO3_data()
 
-def update_acled_event_map(selected_date):
+def update_acled_event_map(iso3_data, acled_event_data, selected_column, selected_date, selected_countries):
+    
+    # Load the ISO-3 coordinates from the JSON file
+    with open("data/raw/iso3_coordinates.json", "r") as f:
+        iso3_coords = json.load(f)
+    
     # Filter data for the selected date
-    filtered_df = acled_event_data[acled_event_data['event_date'] == selected_date]
+    acled_filtered = acled_event_data[acled_event_data['event_date'] == selected_date]
+    
+    filtered_dfs = []
+    for country in selected_countries:
+        filtered_dfs.append(acled_filtered[acled_filtered['country'] == country])
+    filtered_df = pd.concat(filtered_dfs)
 
     # Group by latitude, longitude, and event_type
     grouped = filtered_df.groupby(['latitude', 'longitude', 'event_type']).agg(
@@ -112,15 +170,38 @@ def update_acled_event_map(selected_date):
                             opacity=0.5,
                             template='plotly_dark')
 
-    # Update map style
-    fig.update_layout(mapbox_style="carto-positron",
-    legend=dict(
+    
+    # Set map center and zoom level
+    # If selected_iso is provided and exists in the coordinates, center on it; otherwise use a default.
+    selected_iso = None
+    center = {"lat": 20, "lon": 20}  # Default center (world view)
+    zoom = 1
+    if isinstance(selected_countries, list) and len(selected_countries)==1:
+        selected_country = selected_countries[0]
+        # Filter the data for the selected country and get the first occurrence of ISO_3
+        selected_iso = iso3_data.loc[iso3_data['Country'] == selected_country, 'ISO_3166-3'].iloc[0] if not iso3_data.loc[iso3_data['Country'] == selected_country, 'ISO_3166-3'].empty else None
+    if selected_iso and selected_iso in iso3_coords:
+        center = {"lat": iso3_coords[selected_iso][0], "lon": iso3_coords[selected_iso][1]}
+        zoom = 4  # Adjust zoom level as desired
+
+    # Update layout so the map occupies its container and has no padding
+    fig.update_layout(
+        margin=dict(l=0, r=0, b=0, t=0, pad=0),
+        autosize=True,
+        mapbox=dict(
+            style="carto-positron",  # You can change to other Mapbox styles if needed
+            center=center,
+            zoom=zoom
+        ),
+        legend=dict(
         orientation="h",
         yanchor="bottom",
-        y=1.02,
-        xanchor="right",
-        x=1,
-    ))
+        y=0.00,
+        xanchor="left",
+        x=0.00,),
+        coloraxis_showscale=False
+    )
+    
 
     # Add ACLED attribution annotation
     fig.add_annotation(
@@ -130,98 +211,261 @@ def update_acled_event_map(selected_date):
         font=dict(size=10, color="white")
     )
 
-    return [fig]
+    return fig
+
+
+# Load your data once
+
+
+def create_bar_plot(freq, selected_column, selected_date, selected_countries):
+    """
+    Create a horizontal bar plot with an aggregated "Other (0)" bar for zero values,
+    adding a shadow and annotation for each selected country, with consistent colors.
+    """
+    data = load_all_data(freq)
+    # Filter and sort data for the selected date
+    filtered_data = data[data['event_date'] == selected_date]
+    sorted_data = filtered_data.sort_values(by=selected_column, ascending=False)
+    
+    # Separate nonzero and zero-value countries
+    nonzero_data = sorted_data[sorted_data[selected_column] > 0]
+    zero_data = sorted_data[sorted_data[selected_column] == 0]
+    
+    # Build y-axis labels and x-values
+    y_labels = list(nonzero_data['country'])
+    if not zero_data.empty:
+        y_labels.append("Other (0)")
+    x_values = list(nonzero_data[selected_column])
+    if not zero_data.empty:
+        x_values.append(0)
+    
+    # Create horizontal bar plot (main bars)
+    bar_fig = go.Figure()
+    bar_fig.add_trace(go.Bar(
+        x=x_values,
+        y=y_labels,
+        orientation='h',
+        marker_color='white',
+        name=selected_column
+    ))
+    
+    # Ensure selected_countries is a list
+    if not isinstance(selected_countries, list):
+        selected_countries = [selected_countries]
+    
+    # Define a discrete color mapping for selected countries (same as in line plot)
+    color_sequence = px.colors.qualitative.Plotly
+    color_mapping = {country: color_sequence[i % len(color_sequence)]
+                     for i, country in enumerate(selected_countries)}
+    
+    max_val = sorted_data[selected_column].max()
+    
+    # Add a shadow trace and annotation for each selected country
+    for country in selected_countries:
+        if country in nonzero_data['country'].values:
+            shadow_y = country
+        else:
+            shadow_y = "Other (0)"
+        
+        country_color = color_mapping.get(country, 'green')
+        
+        # Shadow trace: a horizontal bar spanning full height, colored using the mapping
+        bar_fig.add_trace(go.Bar(
+            x=[max_val],
+            y=[shadow_y],
+            orientation='h',
+            marker_color=country_color,
+            opacity=0.7,
+            showlegend=False,
+            hoverinfo='skip'
+        ))
+    
+    bar_fig.update_layout(
+        template='plotly_dark',
+        xaxis_title="",
+        yaxis_title="",
+        yaxis=dict(showticklabels=False),
+        xaxis=dict(showticklabels=False),
+        barmode='overlay',
+        coloraxis_showscale=False,
+        showlegend=False,
+        autosize=True,
+        margin=dict(l=0, r=0, t=0, b=0)
+    )
+    return bar_fig
 
 
 
-data = load_all_data()
-# Callback for bar plot and world map
+def create_world_map(data, selected_column, selected_date, selected_countries=None):
+    """
+    Create a Scatter Mapbox using data filtered by the selected date,
+    using coordinates from the iso3_coordinates.json file.
+    
+    Optionally, if selected_iso is provided and found in the JSON file,
+    center and zoom the map on that ISO's coordinates.
+    """
+    # Filter data for the selected date
+    filtered_data = data[data['event_date'] == selected_date].copy()
+    
+    # Load the ISO-3 coordinates from the JSON file
+    with open("data/raw/iso3_coordinates.json", "r") as f:
+        iso3_coords = json.load(f)
+    
+    # Add latitude and longitude columns by looking up each ISO_3 code
+    filtered_data['lat'] = filtered_data['ISO_3'].apply(lambda iso: iso3_coords.get(iso, [None, None])[0])
+    filtered_data['lon'] = filtered_data['ISO_3'].apply(lambda iso: iso3_coords.get(iso, [None, None])[1])
+    
+    # Create a Scatter Mapbox
+    map_fig = px.scatter_mapbox(
+        filtered_data,
+        lat="lat",
+        lon="lon",
+        color=selected_column,
+        hover_name="country",
+        #size=selected_column,  # Optional: size markers by the selected column
+        color_continuous_scale=px.colors.sequential.OrRd,
+        template='plotly_dark'
+    )
+    
+    # Set map center and zoom level
+    # If selected_iso is provided and exists in the coordinates, center on it; otherwise use a default.
+    selected_iso = None
+    center = {"lat": 20, "lon": 20}  # Default center (world view)
+    zoom = 1
+    if isinstance(selected_countries, list) and len(selected_countries)==1:
+        selected_country = selected_countries[0]
+        # Filter the data for the selected country and get the first occurrence of ISO_3
+        selected_iso = data.loc[data['country'] == selected_country, 'ISO_3'].iloc[0] if not data.loc[data['country'] == selected_country, 'ISO_3'].empty else None
+    if selected_iso and selected_iso in iso3_coords:
+        center = {"lat": iso3_coords[selected_iso][0], "lon": iso3_coords[selected_iso][1]}
+        zoom = 4  # Adjust zoom level as desired
+
+    # Update layout so the map occupies its container and has no padding
+    map_fig.update_layout(
+        margin=dict(l=0, r=0, b=0, t=0, pad=0),
+        autosize=True,
+        mapbox=dict(
+            style="open-street-map",  # You can change to other Mapbox styles if needed
+            center=center,
+            zoom=zoom
+        ),
+        coloraxis_showscale=False
+    )
+    
+    return map_fig
+
+
+# Callback that calls both functions
 @app.callback(
     [Output('bar-plot', 'figure'),
      Output('world-map', 'figure')],
-    [Input('ranking-column', 'value'),
+    [Input('frequency', 'value'),
+     Input('ranking-column', 'value'),
      Input('ranking-date', 'value'),
-     Input('num-countries', 'value')]
+     Input('evolution-country', 'value')]
 )
-
-def update_bar_and_map(selected_column, selected_date, num_countries):
-    # Filter the data for the selected date
-    filtered_data = data[data['event_date'] == selected_date]
-    # Sort countries by the selected column
-    sorted_data = filtered_data.sort_values(by=selected_column, ascending=False).head(num_countries)
-    # Convert string to date
-    date_obj = datetime.strptime(selected_date, "%Y-%m-%d")
-    # Subtract 6 days
-    six_days_before = date_obj - timedelta(days=6)
-    six_days_before_str = six_days_before.strftime("%Y-%m-%d")
-    # Create the bar plot
-    bar_fig = px.bar(sorted_data, x='country', y=selected_column, template='plotly_dark',
-                     color=selected_column, color_continuous_scale='orrd',
-                 title=f'Top {num_countries} countries by {selected_column} from {transform_date_to_day_first(six_days_before_str)} to {transform_date_to_day_first(selected_date)}')
-    bar_fig.update_layout(coloraxis_colorbar_title_text="", )  # Remove color bar title
-
-    # Create the world map
-    map_fig = px.choropleth(
-        filtered_data,
-        locations="ISO_3",
-        color=selected_column,
-        hover_name="country",
-        projection="natural earth",
-        color_continuous_scale=px.colors.sequential.OrRd,
-        title=selected_column + " by Country",
-        template='plotly_dark'
-    )
-    map_fig.update_layout(autosize=False, margin = dict(l=0,r=0,b=0,t=0,pad=4,autoexpand=True),
-        title_text=selected_column + ' by Country',
-        geo=dict(showframe=False, showcoastlines=True, projection_type='natural earth'),
-        coloraxis_colorbar_title_text=""  # Remove color bar title
-    )
+def update_bar_and_map(freq, selected_column, selected_date, selected_countries):
+    bar_fig = create_bar_plot(freq, selected_column, selected_date, selected_countries)
+    map_fig = update_acled_event_map(iso3_data, acled_event_data, selected_column, selected_date, selected_countries)
+    #map_fig = create_world_map(data, selected_column, selected_date, selected_countries)
     return bar_fig, map_fig
 
 
-unavailable_table_cols = ['country', 'month', 'quarter', 'week', 'event_date', 'country', 'ISO_3', 'capital_lat', 'capital_lon', 'violence index_exp_moving_avg', 'General', 'Legislative', 'Local', 'Parliamentary', 'Presidential', 'Referendum', 'holiday']
-# Callback for line plot and data table
+
+# Callback for line plot
 @app.callback(
-    [Output('line-plot', 'figure'),
-     Output('data-table', 'data'),
-     Output('data-table', 'columns')],
-    [Input('evolution-column', 'value'),
+    Output('line-plot', 'figure'),
+    [Input('frequency', 'value'),
+     Input('ranking-column', 'value'),
      Input('evolution-country', 'value'),
-     Input('plot-date', 'value')]
+     Input('ranking-date', 'value')]
 )
-
-def update_line_plot_and_table(selected_column, selected_countries, plot_date):
-    # Create an empty DataFrame to collect data for selected countries
+def update_line_plot(freq, selected_column, selected_countries, plot_date):
+    data = load_all_data(freq)
+    # Combine data for selected countries
     combined_data = pd.DataFrame()
-    
-    # Load data for each selected country and append it to combined_data
     for country in selected_countries:
-        country_data = pd.read_csv(os.path.join(DATA_PATH, f'{country}.csv'))
-        country_data['country'] = country
+        country_data = data[data['country'] == country]
         combined_data = pd.concat([combined_data, country_data])
-
-    # Create the line plot showing the evolution of the selected column for each country
-    line_fig = px.line(combined_data, x='event_date', y=selected_column, color='country', template='plotly_dark',
-                  title=f'{selected_column} over time for {", ".join(selected_countries)}')
     
-    # Add circle markers for each country at the plot_date
+    # Define a discrete color mapping for selected countries
+    color_sequence = px.colors.qualitative.Plotly
+    color_mapping = {country: color_sequence[i % len(color_sequence)] 
+                     for i, country in enumerate(selected_countries)}
+    
+    # Create the line plot using the discrete color mapping
+    line_fig = px.line(
+        combined_data, 
+        x='event_date', 
+        y=selected_column, 
+        color='country', 
+        template='plotly_dark',
+        color_discrete_map=color_mapping
+    )
+
+    # Compute x-axis range (last 60 dates)
+    plot_date
+    all_dates = sorted(combined_data[combined_data['event_date']<=plot_date]['event_date'].unique())
+    default_range = [all_dates[-60], all_dates[-1]] if len(all_dates) > 60 else [all_dates[0], all_dates[-1]] if all_dates else [plot_date]
+    
+    line_fig.update_layout(
+        xaxis_range=default_range,
+        xaxis_title="",
+        yaxis_title="",
+        autosize=True,
+        margin=dict(l=0, r=0, t=0, b=0)
+    )
+    
+    # Add scatter markers for each selected country at plot_date
     for country in selected_countries:
         country_data = combined_data[combined_data['country'] == country]
-        
-        # Find the y-value (selected_column value) at the plot_date
-        y_value = country_data.loc[country_data['event_date'] == plot_date, selected_column].values[0]
-        
-        # Add a scatter trace for the marker at the specific point
-        line_fig.add_scatter(x=[plot_date], y=[y_value], mode='markers',
-                             marker=dict(color='white', size=10, symbol='circle'),
-                             name=f'{country} date')
-
-    line_fig.update_layout(legend=dict(orientation="h",yanchor="bottom",y=1.02,xanchor="right",x=1,))
+        y_value = 0
+        if not country_data.empty and plot_date in country_data['event_date'].values:
+            y_value = country_data.loc[country_data['event_date'] == plot_date, selected_column].values[0]
+        line_fig.add_scatter(
+            x=[plot_date], 
+            y=[y_value], 
+            mode='markers',
+            marker=dict(color='white', size=10, symbol='circle'),
+            name=f'{country} date'
+        )
     
-    # Prepare the table data for the selected countries
+    # Ensure scatter markers are on top by reordering traces
+    line_traces = [trace for trace in line_fig.data if 'lines' in trace.mode]
+    scatter_traces = [trace for trace in line_fig.data if 'markers' in trace.mode]
+    line_fig.data = tuple(line_traces + scatter_traces)
+    
+    # Update legend layout
+    line_fig.update_layout(showlegend=False)
+    
+    return line_fig
+
+
+
+unavailable_table_cols = ['country', 'month', 'quarter', 'week', 'event_date', 'country', 'ISO_3', 
+                          'capital_lat', 'capital_lon', 'violence index_exp_moving_avg', 'General', 
+                          'Legislative', 'Local', 'Parliamentary', 'Presidential', 'Referendum', 'holiday']
+# Callback for data table
+@app.callback(
+    [Output('data-table', 'data'),
+     Output('data-table', 'columns'),
+     Output('data-table', 'style_data_conditional')],
+    [Input('frequency', 'value'),
+     Input('ranking-column', 'value'),
+     Input('evolution-country', 'value'),
+     Input('ranking-date', 'value')]
+)
+def update_data_table(freq, selected_column, selected_countries, plot_date):
+    combined_data = pd.DataFrame()
+    data = load_all_data(freq)
+    for country in selected_countries:
+        country_data = data[data['country'] == country]
+        combined_data = pd.concat([combined_data, country_data])
+
     table_data = []
     for country in selected_countries:
         country_data = combined_data[combined_data['country'] == country]
+        # Take the first record where event_date equals plot_date
         latest_values = country_data.loc[country_data['event_date'] == plot_date].to_dict('records')[0]
         table_data.append(latest_values)
 
@@ -229,25 +473,28 @@ def update_line_plot_and_table(selected_column, selected_countries, plot_date):
     for col in combined_data.columns:
         if col in unavailable_table_cols:
             continue
-        string_col = col.replace("_", ": ")
-        string_col = string_col.replace("/", ", ")
-        string_col = 'Violence index 1 Year moving average' if col == 'violence index_moving_avg' else string_col
+
+        string_col = col.replace("_", ": ").replace("/", ", ")
         new_row = {'Country': string_col}
         for i, country in enumerate(selected_countries):
-            new_row[country] = table_data[i][col]
-            if isinstance(table_data[i][col], float):
-                new_row[country] = np.round(table_data[i][col],0)
-        # Append value if is not 0 in 1 of the countries
-        for i, country in enumerate(selected_countries):
-            append_value = False
-            if table_data[i][col] not in [0, '0']:
-                append_value = True
-            if append_value:
-                new_table_data.append(new_row)
+            value = table_data[i][col]
+            new_row[country] = np.round(value, 0) if isinstance(value, float) else value
 
-    
-    columns_default = [{'name':'Country', 'id':'Country'}]
-    columns = [{'name':country, 'id':country} for country in selected_countries]
-    columns = columns_default + columns
+        # Append row if at least one of the countries has a nonzero value
+        if any(table_data[i][col] not in [0, '0'] for i in range(len(selected_countries))):
+            new_table_data.append(new_row)
 
-    return line_fig, new_table_data, columns
+    columns = [{'name': 'Country', 'id': 'Country'}] + \
+              [{'name': country, 'id': country} for country in selected_countries]
+
+    string_selected_col = selected_column.replace("_", ": ").replace("/", ", ")
+    # Create dynamic style: highlight the row where "Country" matches the selected column.
+    style_data_conditional = [{
+        'if': {
+            'filter_query': '{Country} = "' + string_selected_col + '"'
+        },
+        'color': 'rgb(255, 120, 120)',
+        'backgroundColor': 'rgb(60, 50, 50)'
+    }]
+
+    return new_table_data, columns, style_data_conditional
