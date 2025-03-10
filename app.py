@@ -29,7 +29,6 @@ FORECAST_HTML_PATH = 'docs/figures/operative/TiDE/'
 ISO3_PATH = 'data/raw/ACLED_coverage_ISO3.csv'
 
 
-
 available_variables = sorted([f for f in os.listdir(FORECAST_PATH) if os.path.isdir(os.path.join(FORECAST_PATH, f))], reverse=True)
 default_variable = available_variables[1]
 
@@ -64,7 +63,6 @@ default_acled_event_date = available_acled_event_dates[-1]
 wdi_data = load_WDI_data()
 
 frequencies = ["daily", "weekly", "monthly"]
-
 
 # You would prepare and pass the necessary arguments for forecasting
 available_variables = ["battles fatalities", "violence index"]  # example list
