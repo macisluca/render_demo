@@ -157,7 +157,9 @@ def get_monitoring_worldbank_layout(wdi_data):
                 clearable=False,
                 className='dcc-dropdown'
             ),
-            dcc.Graph(id='wb-bar-plot', className='dcc-graph'),
+            html.Div([
+            html.Div([
+                dcc.Graph(id='wb-bar-plot', className='dcc-graph'),
             html.H3('Select Number of Countries:'),
             dcc.Slider(
                 id='wb-num-countries',
@@ -166,12 +168,15 @@ def get_monitoring_worldbank_layout(wdi_data):
                 step=10,
                 value=10,
                 marks={i: str(i) for i in range(10, len(default_df[country_col].unique()) + 10, 10)}
-            ),
-            dcc.Graph(id='wb-world-map', className='dcc-graph')
+            )
+            ], style={'flex': '1', 'padding': '10px'}),
+            html.Div([
+                dcc.Graph(id='wb-world-map', className='dcc-graph')
+            ], style={'flex': '1', 'padding': '10px'}),
+        ], style={'display': 'flex', 'width': '100%', 'gap': '20px'}),
         ])
     ])
     return layout
-
 
 
 def get_monitoring_elections_layout(elections_df):

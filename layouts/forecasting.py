@@ -14,8 +14,6 @@ def get_country_list(variable, window):
     return country_names
 
 def get_forecasting_global_layout(available_variables, default_variable):
-    import os
-    from dash import dcc, html
     # Define available windows and a default
     available_windows = ["daily", "weekly", "monthly"]
     default_window = "weekly"
@@ -106,11 +104,12 @@ def get_forecasting_country_layout(available_variables, default_variable):
     # Define available windows and a default
     available_windows = ["daily", "weekly", "monthly"]
     default_window = "weekly"
-    default_country = 'Afghanistan'
+    default_country = 'AFG'
     countries = get_country_list(default_variable, default_window)
     
     # Build the CSV path for default selections:
     csv_path = os.path.join("models/TiDE/predictions", default_variable, default_window, f"{default_country}.csv")
+    print(csv_path)
     try:
         df = pd.read_csv(csv_path)
         forecasted_dates = sorted(df['forecast'].unique())

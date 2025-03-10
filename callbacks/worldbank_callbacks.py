@@ -73,9 +73,18 @@ def update_world_bank_graphs(selected_column, selected_year, num_countries, sele
          template='plotly_dark',
          color=selected_column,
          color_continuous_scale='orrd',
-         title=f'Top {num_countries} countries by {selected_column} in {selected_year}'
+         title=""
          )
-    bar_fig.update_layout(coloraxis_colorbar_title_text="")
+    bar_fig.update_layout(
+        coloraxis_colorbar_title_text="",
+        xaxis_title="",
+        yaxis_title="",
+        yaxis=dict(showticklabels=False),
+        xaxis=dict(showticklabels=False),
+        coloraxis_showscale=False,
+        autosize=True,
+        margin=dict(l=0, r=0, t=0, b=0)
+        )
     bar_fig.update_yaxes(visible=False, showticklabels=False)
     
     # Create the choropleth world map
@@ -86,9 +95,12 @@ def update_world_bank_graphs(selected_column, selected_year, num_countries, sele
          hover_name="ISO_3",
          projection="natural earth",
          color_continuous_scale=px.colors.sequential.OrRd,
-         title=f'{selected_column} by Country in {selected_year}',
          template='plotly_dark'
     )
-    map_fig.update_layout(coloraxis_colorbar_title_text="")
+    map_fig.update_layout(
+        coloraxis_colorbar_title_text="",
+        autosize=True,
+        margin=dict(l=0, r=0, t=0, b=0)
+        )
     
     return bar_fig, map_fig

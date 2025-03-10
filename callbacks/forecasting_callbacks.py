@@ -307,10 +307,11 @@ def generate_simplified_plot(df_filtered, selected_forecast_date, selected_varia
 )
 def update_forecasting_global_dashboard(selected_variable, selected_window, selected_forecast_date):
     # Load the CSV data using the wrapper function.
-    df = load_forecast_data_wrapper(selected_variable, selected_window, 'Afghanistan')
+    df = load_forecast_data_wrapper(selected_variable, selected_window, 'AFG')
     if df is None:
         return [], None, {}
     forecasted_dates, forecast_date_options = get_forecast_date_options(df)
+
     if selected_forecast_date not in forecasted_dates:
         selected_forecast_date = forecasted_dates[0] if forecasted_dates else None  
     return forecast_date_options, selected_forecast_date
@@ -352,64 +353,78 @@ def update_forecasting_dashboard(selected_variable, selected_window, selected_co
      Input('forecast-date', 'value')]
 )
 def update_forecast_world_map_simplified(selected_variable, selected_window, selected_forecast_date):
-    # Load the ISO3 mapping.
-    iso3_df = load_ISO3_data()  # Expected to return a DataFrame with columns "Country" and "ISO_3"
+    # Define the base path for CSV files
+    csv_path = os.path.join("models/TiDE/predictions", selected_variable, selected_window)
     
+    # Get all country CSV filenames (assuming files are named by country)
+    try:
+        countries_folder = [f[:-4] for f in os.listdir(csv_path) if f.endswith('.csv')]
+    except FileNotFoundError:
+        print(f"Directory not found: {csv_path}")
+        return {}
+
     results = []
-    # Loop over all countries in the ISO3 DataFrame.
-    for idx, row in iso3_df.iterrows():
-        country_name = row["Country"]  # Use the country name to build the file path.
-        iso3 = row["ISO_3166-3"]
-        csv_path = os.path.join("models/TiDE/predictions", selected_variable, selected_window, f"{country_name}.csv")
+
+    for country_name in countries_folder:
+        country_csv_path = os.path.join(csv_path, f"{country_name}.csv")
+        
         try:
-            df_country = pd.read_csv(csv_path)
+            df_country = pd.read_csv(country_csv_path)
         except Exception as e:
-            # If a file isn’t found, skip this country.
-            continue
-        # Filter data for the selected forecast date.
+            print(f"Error reading {country_csv_path}: {e}")
+            continue  # Skip this country if there's an issue
+        
+        # Filter data for the selected forecast date
         df_country = df_country[df_country["forecast"] == selected_forecast_date]
         if df_country.empty:
             continue
-        # Compute the majority (simplified) category.
+
+        # Compute the majority (simplified) category
         majority_category = get_majority_category(df_country, selected_variable)
         if majority_category is not None:
-            results.append({"ISO_3": iso3, "category": majority_category})
-    
+            results.append({
+                "ISO_3": country_name,  # Assuming the filename is the ISO3 code
+                "category": majority_category
+            })
+
     if not results:
         return {}
-    
+
     results_df = pd.DataFrame(results)
-    
-    # Define color mapping based on variable.
-    if selected_variable.lower().strip() == "violence index":
-        color_map = {
+
+    # Define color mapping based on the selected variable
+    variable_lower = selected_variable.lower().strip()
+    color_maps = {
+        "violence index": {
             "Mild": "green",
             "Moderate": "yellow",
             "Intense": "orange",
             "Critical": "red"
-        }
-    elif selected_variable.lower().strip() == "battles fatalities":
-        color_map = {
+        },
+        "battles fatalities": {
             "No Fatalities": "white",
             "Low Fatalities": "lightcoral",
             "Medium Fatalities": "red",
             "High Fatalities": "darkred"
         }
-    else:
-        # For other variables, you may choose a default mapping or leave it uncolored.
-        color_map = None
-    
+    }
+
+    color_map = color_maps.get(variable_lower, {})
+
+    # Create the choropleth map using Plotly
     fig = px.choropleth(
         results_df,
         locations="ISO_3",
         color="category",
         hover_name="category",
         projection="natural earth",
-        color_discrete_map=color_map,
+        color_discrete_map=color_map if color_map else None,
         template="plotly_dark",
         title=f"Forecast Simplified Majority Category for {selected_forecast_date}"
     )
+
     return fig
+
 
 
 @app.callback(
@@ -491,25 +506,40 @@ def compute_category_probability(df, selected_variable, chosen_category):
      Input('num-countries-bar-forecast', 'value')]
 )
 def update_forecast_bar_plot_simplified(selected_variable, selected_window, selected_forecast_date, chosen_category, num_countries):
-    iso_df = load_ISO3_data()  # Should return a DataFrame with at least "Country" and "ISO_3"
+
+    # Define the base path for CSV files
+    csv_path = os.path.join("models/TiDE/predictions", selected_variable, selected_window)
+    
+    # Get all country CSV filenames (assuming files are named by country)
+    try:
+        countries_folder = [f[:-4] for f in os.listdir(csv_path) if f.endswith('.csv')]
+    except FileNotFoundError:
+        print(f"Directory not found: {csv_path}")
+        return {}
+
     results = []
-    for idx, row in iso_df.iterrows():
-        country_name = row["Country"]
-        iso3 = row["ISO_3166-3"]
-        csv_path = os.path.join("models/TiDE/predictions", selected_variable, selected_window, f"{country_name}.csv")
+
+    for country_name in countries_folder:
+        country_csv_path = os.path.join(csv_path, f"{country_name}.csv")
+        
         try:
-            df_country = pd.read_csv(csv_path)
+            df_country = pd.read_csv(country_csv_path)
         except Exception as e:
-            continue
-        # Filter by the selected forecast date
+            print(f"Error reading {country_csv_path}: {e}")
+            continue  # Skip this country if there's an issue
+        
+        # Filter data for the selected forecast date
         df_country = df_country[df_country["forecast"] == selected_forecast_date]
         if df_country.empty:
             continue
+        # Compute the probability by category
         prob = compute_category_probability(df_country, selected_variable, chosen_category)
         if prob is not None:
-            results.append({"Country": country_name, "ISO_3": iso3, "Probability": prob})
+            results.append({"Country": country_name, "ISO_3": country_name, "Probability": prob})
+
     if not results:
         return {}
+
     results_df = pd.DataFrame(results)
     results_df = results_df.sort_values(by="Probability", ascending=False).head(num_countries)
     fig = px.bar(
