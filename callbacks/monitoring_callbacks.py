@@ -418,7 +418,8 @@ def update_line_plot(freq, selected_column, selected_countries, plot_date):
         xaxis_title="",
         yaxis_title="",
         autosize=True,
-        margin=dict(l=0, r=0, t=0, b=0)
+        margin=dict(l=0, r=0, t=0, b=0),
+        legend=dict(orientation='h', y=-0.3)
     )
     
     # Add scatter markers for each selected country at plot_date
