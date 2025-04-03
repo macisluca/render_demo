@@ -2,11 +2,13 @@ import os
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 from app_instance import app
 
 from utils.date_utils import get_majority_category
-from utils.data_loader import load_ISO3_data
+from utils.data_loader import load_ISO3_data, load_all_data
+
 
 
 def load_forecast_data_wrapper(selected_variable, selected_window, selected_country):
@@ -320,14 +322,15 @@ def update_forecasting_global_dashboard(selected_variable, selected_window, sele
 @app.callback(
     [Output('forecast-date-country', 'options'),
      Output('forecast-date-country', 'value'),
-     Output('forecast-bar-plot', 'figure')],
+     Output('forecast-bar-plot-det', 'figure'),
+     Output('forecast-bar-plot-sim', 'figure')],
     [Input('forecast-variable-country', 'value'),
      Input('forecast-window-country', 'value'),
-     Input('forecast-country', 'value'),
-     Input('forecast-date-country', 'value'),
-     Input('forecast-display-mode', 'value')]
+     Input('forecast-countries', 'value'),
+     Input('forecast-country-distribution', 'value'),
+     Input('forecast-date-country', 'value')]
 )
-def update_forecasting_dashboard(selected_variable, selected_window, selected_country, selected_forecast_date, display_mode):
+def update_forecasting_dashboard(selected_variable, selected_window, selected_countries, selected_country, selected_forecast_date):
     # Load the CSV data using the wrapper function.
     df = load_forecast_data_wrapper(selected_variable, selected_window, selected_country)
     if df is None:
@@ -336,14 +339,10 @@ def update_forecasting_dashboard(selected_variable, selected_window, selected_co
     if selected_forecast_date not in forecasted_dates:
         selected_forecast_date = forecasted_dates[0] if forecasted_dates else None
     df_filtered = df[df['forecast'] == selected_forecast_date]
-    if df_filtered.empty:
-        fig = {}
-    else:
-        if display_mode == "detailed":
-            fig = generate_detailed_plot(df_filtered, selected_variable, selected_forecast_date)
-        else:
-            fig = generate_simplified_plot(df_filtered, selected_forecast_date, selected_variable)
-    return forecast_date_options, selected_forecast_date, fig
+    if not df_filtered.empty:
+        fig_det = generate_detailed_plot(df_filtered, selected_variable, selected_forecast_date)
+        fig_sim = generate_simplified_plot(df_filtered, selected_forecast_date, selected_variable)
+    return forecast_date_options, selected_forecast_date, fig_det, fig_sim
 
 
 @app.callback(
@@ -424,7 +423,6 @@ def update_forecast_world_map_simplified(selected_variable, selected_window, sel
     )
 
     return fig
-
 
 
 @app.callback(
@@ -575,4 +573,190 @@ def update_category_explanation(selected_variable):
         )
     else:
         return "No simplified categories available for this variable."
+
+
+def load_forecast_data_wrapper(selected_variable, selected_window, selected_country):
+    """
+    Loads forecast CSV data from the specified path.
+    Returns the DataFrame or None if the file cannot be read.
+    """
+    csv_path = os.path.join("models/TiDE/predictions", selected_variable, selected_window, f"{selected_country}.csv")
+    try:
+        df = pd.read_csv(csv_path)
+        return df
+    except Exception as e:
+        print(f"Error loading CSV at {csv_path}: {e}")
+        return None
+
+def get_forecast_date_options(df):
+    """
+    Given a DataFrame with a 'forecast' column,
+    returns a sorted list of unique forecast dates as options.
+    """
+    forecasted_dates = sorted(df['forecast'].unique())
+    options = [{'label': date, 'value': date} for date in forecasted_dates]
+    return forecasted_dates, options
+
+def get_bounds(samples_array_list: list, lower_bound_percent=5, upper_bound_percent=95):
+    """
+    Calculate the lower, mid, and upper bounds for a list of sample arrays based on given percentiles.
+    """
+    lower_bound_list = [np.percentile(samples_array, lower_bound_percent) for samples_array in samples_array_list]
+    upper_bound_list = [np.percentile(samples_array, upper_bound_percent) for samples_array in samples_array_list]
+    mid_bound_list = [np.percentile(samples_array, 50) for samples_array in samples_array_list]
+
+    return mid_bound_list, lower_bound_list, upper_bound_list
+
+def hex_to_rgba(hex_color, opacity):
+    hex_color = hex_color.lstrip('#')
+    r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    return f'rgba({r},{g},{b},{opacity})'
+
+@app.callback(
+    [Output('forecast-line-plot', 'figure')],
+    [Input('forecast-countries', 'value'),
+     Input('forecast-window-country', 'value'),
+     Input('forecast-variable-country', 'value')]
+)
+def line_plot_country_predictions(selected_countries, selected_window, target_name):
+    """
+    Plot countries prediction image.
+    
+    Returns:
+        Figure: A line plot figure with historical and forecast data.
+    """
+    # Define a discrete color mapping for selected countries
+    color_sequence = px.colors.qualitative.Plotly
+    color_mapping = {country: color_sequence[i % len(color_sequence)] 
+                     for i, country in enumerate(selected_countries)}
+    
+    # Load historical data (assumed to include 'event_date' and target_name)
+    data = load_all_data(selected_window)
+    
+    # Create the plot
+    fig = go.Figure()
+    
+    for country in selected_countries:
+        # Use each country's own data rather than concatenating all together
+        country_data = data[data['ISO_3'] == country]
+        # Use only the last 12 events
+        dates_plot = country_data['event_date'].tail(12).to_list()
+        # Convert dates to datetime for proper x-axis handling
+        dates_plot = [pd.to_datetime(d) for d in dates_plot]
+        
+        if target_name == 'battles fatalities':
+            target_name_bf = 'Fatalities_Battles'
+            target_values = country_data[target_name_bf].to_list()
+        else:
+            target_values = country_data[target_name].to_list()
+        if not target_values:
+            continue  # Skip if no historical data
+        
+        max_value = max(target_values)
+        target_values = target_values[-12:]
+        
+        # Load predictions for the current country
+        samples_array_list = []
+        df = load_forecast_data_wrapper(target_name, selected_window, country)
+        if df is None:
+            continue
+        forecasted_dates, _ = get_forecast_date_options(df)
+        for date in forecasted_dates:
+            date_df = df[df['forecast'] == date]
+            samples_array = np.array(date_df['outcome'].to_list())
+            samples_array_list.append(samples_array)
+        
+        # Combine the last 12 historical dates with forecasted dates and convert to datetime
+        forecast_dates = [pd.to_datetime(d) for d in forecasted_dates]
+        full_dates = dates_plot + forecast_dates
+        
+        # Calculate bounds (using lists directly, since they are scalars)
+        mid_bounds, lower_bounds, upper_bounds = get_bounds(samples_array_list, 1, 99)
+        # For additional CIs:
+        _, lower25_bounds, upper75_bounds = get_bounds(samples_array_list, 25, 75)
+        _, lower40_bounds, upper60_bounds = get_bounds(samples_array_list, 40, 60)
+        
+        # Create x-axis values for forecasts: starting from the last historical date index
+        shifted_x = list(range(len(target_values) - 1, len(target_values) + len(mid_bounds)))
+    
+        # Add past values trace
+        fig.add_trace(go.Scatter(
+            x=list(range(len(target_values))),
+            y=target_values,
+            mode='lines',
+            name=f'{country} Past',
+            line=dict(color=color_mapping[country])
+        ))
+        
+        # Add forecast values trace (starting from the last historical value)
+        fig.add_trace(go.Scatter(
+            x=shifted_x,
+            y=[target_values[-1]] + list(mid_bounds),
+            mode='lines+markers',
+            name=f'{country} Forecast',
+            line=dict(color=color_mapping[country]),
+            showlegend=True
+        ))
+        
+        # Add confidence interval traces
+        fig.add_trace(go.Scatter(
+            x=shifted_x + shifted_x[::-1], 
+            y=[target_values[-1]] + list(lower_bounds) + ([target_values[-1]] + list(upper_bounds))[::-1],
+            fill='toself', 
+            fillcolor=hex_to_rgba(color_mapping[country], 0.25),
+            line=dict(color='rgba(255,255,255,0)'),
+            name=f'{country} 1-99% CI',
+            showlegend=False
+        ))
+        fig.add_trace(go.Scatter(
+            x=shifted_x + shifted_x[::-1], 
+            y=[target_values[-1]] + list(lower25_bounds) + ([target_values[-1]] + list(upper75_bounds))[::-1],
+            fill='toself',
+            fillcolor=hex_to_rgba(color_mapping[country], 0.35),
+            line=dict(color='rgba(255,255,255,0)'),
+            name=f'{country} 25-75% CI',
+            showlegend=False
+        ))
+        fig.add_trace(go.Scatter(
+            x=shifted_x + shifted_x[::-1], 
+            y=[target_values[-1]] + list(lower40_bounds) + ([target_values[-1]] + list(upper60_bounds))[::-1],
+            fill='toself',
+            fillcolor=hex_to_rgba(color_mapping[country], 0.45),
+            line=dict(color='rgba(255,255,255,0)'),
+            name=f'{country} 40-60% CI',
+            showlegend=False
+        ))
+        """
+        # Add a horizontal line for the max historical value
+        fig.add_trace(go.Scatter(
+            x=[0, len(target_values) + len(mid_bounds) - 1],
+            y=[max_value, max_value],
+            mode='lines',
+            name=f'{country} Max Historical: {round(max_value, 0)}',
+            line=dict(color=color_mapping[country], dash='dash'),
+            showlegend=True
+        ))
+        """
+
+    
+    full_dates = dates_plot + forecast_dates
+    # Configure the layout; using full_dates for tick labels if desired
+    fig.update_layout(
+        title='Countries Predictions',
+        template='plotly_dark',
+        xaxis_title='Date',
+        yaxis_title=target_name,
+        xaxis=dict(
+            tickmode='array',
+            tickvals=list(range(len(full_dates))),
+            ticktext=[d.strftime('%Y-%m-%d') for d in full_dates]
+        ),
+        yaxis=dict(range=[0, None]),
+        margin=dict(b=160),
+        legend=dict(orientation='h', y=-0.3),
+        showlegend=True
+    )
+
+    return [fig]
+
 

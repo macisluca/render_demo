@@ -219,32 +219,31 @@ def update_acled_event_map(iso3_data, acled_event_data, selected_column, selecte
 
 def create_bar_plot(freq, selected_column, selected_date, selected_countries):
     """
-    Create a horizontal bar plot with an aggregated "Other (0)" bar for zero values,
+    Create a vertical bar plot with an aggregated "Other (0)" bar for zero values,
     adding a shadow and annotation for each selected country, with consistent colors.
     """
     data = load_all_data(freq)
     # Filter and sort data for the selected date
     filtered_data = data[data['event_date'] == selected_date]
-    sorted_data = filtered_data.sort_values(by=selected_column, ascending=False)
+    sorted_data = filtered_data.sort_values(by=selected_column, ascending=True)
     
     # Separate nonzero and zero-value countries
     nonzero_data = sorted_data[sorted_data[selected_column] > 0]
     zero_data = sorted_data[sorted_data[selected_column] == 0]
     
-    # Build y-axis labels and x-values
-    y_labels = list(nonzero_data['country'])
+    # Build x-axis labels (countries) and y-values (values)
+    x_labels = list(nonzero_data['country'])
     if not zero_data.empty:
-        y_labels.append("Other (0)")
-    x_values = list(nonzero_data[selected_column])
+        x_labels.append("Other (0)")
+    y_values = list(nonzero_data[selected_column])
     if not zero_data.empty:
-        x_values.append(0)
+        y_values.append(0)
     
-    # Create horizontal bar plot (main bars)
+    # Create vertical bar plot (main bars)
     bar_fig = go.Figure()
     bar_fig.add_trace(go.Bar(
-        x=x_values,
-        y=y_labels,
-        orientation='h',
+        x=x_labels,
+        y=y_values,
         marker_color='white',
         name=selected_column
     ))
@@ -260,32 +259,38 @@ def create_bar_plot(freq, selected_column, selected_date, selected_countries):
     
     max_val = sorted_data[selected_column].max()
     
-    # Add a shadow trace and annotation for each selected country
+    # Add a shadow trace for each selected country
     for country in selected_countries:
         if country in nonzero_data['country'].values:
-            shadow_y = country
+            shadow_x = country
         else:
-            shadow_y = "Other (0)"
+            shadow_x = "Other (0)"
         
         country_color = color_mapping.get(country, 'green')
         
-        # Shadow trace: a horizontal bar spanning full height, colored using the mapping
+        # Shadow trace: a vertical bar spanning full height, colored using the mapping
         bar_fig.add_trace(go.Bar(
-            x=[max_val],
-            y=[shadow_y],
-            orientation='h',
+            x=[shadow_x],
+            y=[max_val],
             marker_color=country_color,
             opacity=0.7,
             showlegend=False,
             hoverinfo='skip'
         ))
+
+    # Update x-axis: display tick labels only for selected_countries, leaving others blank
+    bar_fig.update_xaxes(
+        tickmode='array',
+        tickvals=x_labels,
+        ticktext=[label if label in selected_countries else '' for label in x_labels]
+    )
     
     bar_fig.update_layout(
         template='plotly_dark',
         xaxis_title="",
         yaxis_title="",
         yaxis=dict(showticklabels=False),
-        xaxis=dict(showticklabels=False),
+        xaxis=dict(showticklabels=True),
         barmode='overlay',
         coloraxis_showscale=False,
         showlegend=False,
@@ -436,7 +441,7 @@ def update_line_plot(freq, selected_column, selected_countries, plot_date):
     line_fig.data = tuple(line_traces + scatter_traces)
     
     # Update legend layout
-    line_fig.update_layout(showlegend=False)
+    line_fig.update_layout(showlegend=True)
     
     return line_fig
 

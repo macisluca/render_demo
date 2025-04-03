@@ -33,37 +33,46 @@ def get_forecasting_global_layout(available_variables, default_variable):
         html.H1('Forecasting Dashboard'),
         html.Div(className='container', children=[
             html.H2('Global Forecasting'),
-            html.H3('Select variable to forecast:'),
-            dcc.Dropdown(
-                id='forecast-variable',
-                options=[{'label': var, 'value': var} for var in available_variables],
-                value=default_variable,
-                clearable=False,
-                className='dcc-dropdown'
-            ),
-            html.H3('Select daily/weekly/monthly forecasts:'),
-            dcc.Dropdown(
-                id='forecast-window',
-                options=[{'label': win, 'value': win} for win in available_windows],
-                value=default_window,
-                clearable=False,
-                className='dcc-dropdown'
-            ),
-            html.H3('Select forecasted date:'),
-            dcc.Dropdown(
-                id='forecast-date',
-                options=[{'label': date, 'value': date} for date in forecasted_dates],
-                value=default_forecasted_date,
-                clearable=False,
-                className='dcc-dropdown'
-            ),
+            html.Div([
+                # Left section: Select variable
+                html.Div([
+                    html.H3('Select variable to forecast:'),
+                    dcc.Dropdown(
+                        id='forecast-variable',
+                        options=[{'label': var, 'value': var} for var in available_variables],
+                        value=default_variable,
+                        clearable=False,
+                        className='dcc-dropdown'
+                    ),
+                ], style={'flex': '1', 'padding': '10px'}),
+
+                # Right section: Select forecast window & date
+                html.Div([
+                    html.H3('Select daily/weekly/monthly forecasts:'),
+                    dcc.Dropdown(
+                        id='forecast-window',
+                        options=[{'label': win, 'value': win} for win in available_windows],
+                        value=default_window,
+                        clearable=False,
+                        className='dcc-dropdown'
+                    ),
+                    html.H3('Select forecasted date:'),
+                    dcc.Dropdown(
+                        id='forecast-date',
+                        options=[{'label': date, 'value': date} for date in forecasted_dates],
+                        value=default_forecasted_date,
+                        clearable=False,
+                        className='dcc-dropdown'
+                    )
+                ], style={'flex': '1', 'padding': '10px'})
+            ], style={'display': 'flex', 'justify-content': 'space-between', 'align-items': 'flex-start'}),
+
             # NEW: Explanation text container for simplified categories.
             html.Div(
                 id='simplified-category-explanation',
-                style={'fontSize': 'small', 'color': 'grey', 'marginTop': '10px'},
+                style={'fontSize': '20px', 'color': 'grey', 'marginTop': '10px'},
                 children="Explanation will appear here."
             ),
-            html.H3('Forecast World Map (Simplified):'),
             dcc.Graph(id='forecast-world-map-simplified', className='dcc-graph'),
             html.H3('Select Simplified Category:'),
             # The options will be updated via a callback.
@@ -109,7 +118,6 @@ def get_forecasting_country_layout(available_variables, default_variable):
     
     # Build the CSV path for default selections:
     csv_path = os.path.join("models/TiDE/predictions", default_variable, default_window, f"{default_country}.csv")
-    print(csv_path)
     try:
         df = pd.read_csv(csv_path)
         forecasted_dates = sorted(df['forecast'].unique())
@@ -126,53 +134,88 @@ def get_forecasting_country_layout(available_variables, default_variable):
         html.H1('Forecasting Dashboard'),
         html.Div(className='container', children=[
         html.H2('Countries Forecasts'),
-        html.H3('Select variable to forecast:'),
-        dcc.Dropdown(
-            id='forecast-variable-country',
-            options=[{'label': var, 'value': var} for var in available_variables],
-            value=default_variable,
-            clearable=False,
-            className='dcc-dropdown'
-        ),
-        html.H3('Select daily/weekly/monthly forecasts:'),
-        dcc.Dropdown(
-            id='forecast-window-country',
-            options=[{'label': win, 'value': win} for win in available_windows],
-            value=default_window,
-            clearable=False,
-            className='dcc-dropdown'
-        ),
-        html.H3('Select country to forecast:'),
-        dcc.Dropdown(
-            id='forecast-country',
-            options=[{'label': c, 'value': c} for c in countries],
-            value=default_country,
-            clearable=False,
-            className='dcc-dropdown'
-        ),
-        html.H3('Select forecasted date:'),
-        dcc.Dropdown(
-            id='forecast-date-country',
-            options=[{'label': date, 'value': date} for date in forecasted_dates],
-            value=default_forecasted_date,
-            clearable=False,
-            className='dcc-dropdown'
-        ),
-        html.H3('Select display mode:'),
-        dcc.RadioItems(
-            id="forecast-display-mode",
-            options=[
-                {"label": "Detailed", "value": "detailed"},
-                {"label": "Simplified", "value": "simplified"}
-            ],
-            value="detailed",
-            labelStyle={"display": "inline-block", "margin-right": "20px"}
-        ),
         html.Div([
-                html.P("Detailed View: this mode displays the full distribution of forecast outcomes. If there are many unique values, the data will be binned so that you can see a more granular distribution, allowing you to analyze variations across the entire range."),
-                html.P("Simplified View: this mode aggregates the forecast outcomes into four predefined categories (for example, Mild/Moderate/Intense/Critical for violence index or No/Low/Medium/High Fatalities for battles fatalities) and shows cumulative percentages. It provides a concise summary of the forecast distribution.")],
-                style={'fontSize': 'small', 'color': 'lightgrey', 'marginTop': '10px'}),
-        dcc.Graph(id='forecast-bar-plot', className='dcc-graph'),
+            # Left section: Select variable & country
+            html.Div([
+                html.H3('Select variable to forecast:'),
+                dcc.Dropdown(
+                    id='forecast-variable-country',
+                    options=[{'label': var, 'value': var} for var in available_variables],
+                    value=default_variable,
+                    clearable=False,
+                    className='dcc-dropdown'
+                ),
+                html.H3('Select countries to forecast:'),
+                dcc.Dropdown(
+                    id='forecast-countries',
+                    options=[{'label': c, 'value': c} for c in countries],
+                    value=[default_country],
+                    multi=True,
+                    clearable=False,
+                    className='dcc-dropdown'
+                ),
+            ], style={'flex': '1', 'padding': '10px'}),
+
+            # Right section: Select forecast window & date
+            html.Div([
+                html.H3('Select daily/weekly/monthly forecasts:'),
+                dcc.Dropdown(
+                    id='forecast-window-country',
+                    options=[{'label': win, 'value': win} for win in available_windows],
+                    value=default_window,
+                    clearable=False,
+                    className='dcc-dropdown'
+                )
+            ], style={'flex': '1', 'padding': '10px'})
+        ], style={'display': 'flex', 'justify-content': 'space-between', 'align-items': 'flex-start'}),
+
+        dcc.Graph(id='forecast-line-plot', className='dcc-graph'),
+
+        html.Div([
+            html.Div([
+                html.H3('Select country for plot distribution:'),
+                dcc.Dropdown(
+                    id='forecast-country-distribution',
+                    options=[{'label': c, 'value': c} for c in countries],
+                    value=default_country,
+                    multi=False,
+                    clearable=False,
+                    className='dcc-dropdown'
+                ),
+                ], style={'flex': '1', 'padding': '10px'}),
+            html.Div([
+                html.H3('Select forecasted date:'),
+                dcc.Dropdown(
+                    id='forecast-date-country',
+                    options=[{'label': date, 'value': date} for date in forecasted_dates],
+                    value=default_forecasted_date,
+                    clearable=False,
+                    className='dcc-dropdown'
+                ),
+                ], style={'flex': '1', 'padding': '10px'}),
+            ], style={'display': 'flex', 'justify-content': 'space-between', 'align-items': 'flex-start'}),
+
+        html.Div([
+            html.P(
+                "Simplified View: this mode aggregates the forecast outcomes into four predefined categories (for example, Mild/Moderate/Intense/Critical for violence index or No/Low/Medium/High Fatalities for battles fatalities) and shows cumulative percentages. It provides a concise summary of the forecast distribution.", 
+                style={'flex': '1', 'textAlign': 'left', 'right-padding': '10px'}
+            ),
+            html.P(
+                "Detailed View: this mode displays the full distribution of forecast outcomes. If there are many unique values, the data will be binned so that you can see a more granular distribution, allowing you to analyze variations across the entire range.", 
+                style={'flex': '1', 'textAlign': 'left', 'left-padding': '10px'}
+            )
+        ], style={'display': 'flex', 'justify-content': 'space-between', 'fontSize': 'small', 'color': 'lightgrey', 'marginTop': '10px'}),
+
+        html.Div([
+            html.Div([
+                dcc.Graph(id='forecast-bar-plot-sim', className='dcc-graph'),
+                ], style={'flex': '1', 'padding': '10px'}),
+            html.Div([
+                dcc.Graph(id='forecast-bar-plot-det', className='dcc-graph'),
+                ], style={'flex': '1', 'padding': '10px'})
+        ], style={'display': 'flex', 'justify-content': 'space-between', 'align-items': 'flex-start'}),
+
+
         html.Footer(
             [
                 "Modifications from ACLED Data: Violence index calculated based on the paper ",
