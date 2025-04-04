@@ -73,18 +73,22 @@ def get_monitoring_acled_layout(frequencies):
         # Bar plot and map
         html.Div([
             html.Div([
+                html.H2('Country Ranking', style={'textAlign': 'left'}),
                 dcc.Graph(id='bar-plot', className='dcc-graph'),
             ], style={'flex': '1', 'padding': '5px'}),
             html.Div([
+                html.H2('Event Map', style={'textAlign': 'left'}),
                 dcc.Graph(id='world-map', className='dcc-graph'),
             ], style={'flex': '1', 'padding': '5px'}),
         ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%', 'gap': '5px'}),
         # Line plot
         html.Div([
+            html.H2('Historical Trend', style={'textAlign': 'left'}),
             dcc.Graph(id='line-plot', className='dcc-graph'),
         ], style={'flex': '1', 'padding': '5px'}),
         # Table
         html.Div([
+            html.H2('Event Table', style={'textAlign': 'left'}),
             dash_table.DataTable(
                 id='data-table',
                 style_data={'color': 'white', 'backgroundColor': 'rgb(50, 50, 50)'},
