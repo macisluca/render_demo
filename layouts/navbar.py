@@ -8,7 +8,7 @@ navbar = dbc.NavbarSimple(
                 dbc.DropdownMenuItem("Explore Events", href="/monitoring/acled"),
                 dbc.DropdownMenuItem("Explore Socio-Political Data", href="/monitoring/worldbank"),
                 dbc.DropdownMenuItem("Explore Elections", href="/monitoring/elections"),
-                dbc.DropdownMenuItem("Explore EDDY Events (Just a Sample)", href="/monitoring/eddy"),
+                #dbc.DropdownMenuItem("Explore EDDY Events (Just a Sample)", href="/monitoring/eddy"),
             ],
             align_end=True,
             nav=True,
