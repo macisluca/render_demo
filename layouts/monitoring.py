@@ -70,6 +70,7 @@ def get_monitoring_acled_layout(frequencies):
             id='selected-countries-text',
             style={'textAlign': 'center', 'padding': '5px', 'fontSize': '16px'}
         ),
+        # Bar plot and map
         html.Div([
             html.Div([
                 dcc.Graph(id='bar-plot', className='dcc-graph'),
@@ -77,10 +78,12 @@ def get_monitoring_acled_layout(frequencies):
             html.Div([
                 dcc.Graph(id='world-map', className='dcc-graph'),
             ], style={'flex': '1', 'padding': '5px'}),
-            html.Div([
-                dcc.Graph(id='line-plot', className='dcc-graph'),
-            ], style={'flex': '1', 'padding': '5px'}),
         ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%', 'gap': '5px'}),
+        # Line plot
+        html.Div([
+            dcc.Graph(id='line-plot', className='dcc-graph'),
+        ], style={'flex': '1', 'padding': '5px'}),
+        # Table
         html.Div([
             dash_table.DataTable(
                 id='data-table',

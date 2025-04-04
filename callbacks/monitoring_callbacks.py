@@ -16,6 +16,43 @@ from utils.data_loader import (
 )
 
 
+def adjust_event_dates(df: pd.DataFrame, freq: str, event_date_col: str = "event_date", target_weekday: int = 4) -> pd.DataFrame:
+    """Adjust event dates in a DataFrame based on the specified frequency.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame containing the event dates.
+        freq (str): Frequency for date adjustment. Options: 'D', 'W', 'M', 'Y'.
+        event_date_col (str, optional): Column name for event dates. Defaults to "event_date".
+        target_weekday (int, optional): Target weekday for weekly frequency (0=Monday, ..., 6=Sunday). Defaults to 4 (Friday).
+
+    Returns:
+        pd.DataFrame: DataFrame with adjusted event dates.
+    """
+    df[event_date_col] = pd.to_datetime(df[event_date_col])
+
+    if freq == 'D':
+        return df
+
+    if freq == 'W':
+        offset = pd.offsets.Week(weekday=target_weekday)
+        condition_mask = df[event_date_col].dt.weekday == target_weekday
+    elif freq == 'M':
+        offset = pd.offsets.MonthEnd(0)
+        condition_mask = df[event_date_col].dt.is_month_end
+    elif freq == 'Y':
+        offset = pd.offsets.YearEnd(0)
+        condition_mask = df[event_date_col].dt.is_year_end
+    else:
+        raise ValueError("Frequency must be one of 'D', 'W', 'M', 'Y'")
+
+    # Separate rows that already meet the condition from those that require adjustment.
+    anchor_dates = df[condition_mask].copy()  # CHANGE: Renamed from extracted_rows for clarity.
+    non_anchor = df[~condition_mask].copy()
+    non_anchor[event_date_col] = non_anchor[event_date_col] + offset
+
+    return pd.concat([non_anchor, anchor_dates])
+
+
 @app.callback(
     Output('selected-countries-text', 'children'),
     [Input('evolution-country', 'value')]
@@ -130,12 +167,24 @@ def update_event_map(selected_date):
 
 iso3_data = load_ISO3_data()
 
-def update_acled_event_map(iso3_data, acled_event_data, selected_column, selected_date, selected_countries):
+def update_acled_event_map(iso3_data, acled_event_data, selected_column, selected_date, selected_countries, frequency):
     
     # Load the ISO-3 coordinates from the JSON file
     with open("data/raw/iso3_coordinates.json", "r") as f:
         iso3_coords = json.load(f)
     
+    # Convert dates
+    if frequency == 'daily':
+        freq = 'D'
+    elif frequency == 'weekly':
+        freq = 'W'
+    else:
+        freq = 'M'
+
+    acled_event_data = adjust_event_dates(acled_event_data, freq)
+    # Convert dates into strings again
+    acled_event_data["event_date"] = acled_event_data["event_date"].dt.strftime("%Y-%m-%d")
+
     # Filter data for the selected date
     acled_filtered = acled_event_data[acled_event_data['event_date'] == selected_date]
     
@@ -230,14 +279,18 @@ def create_bar_plot(freq, selected_column, selected_date, selected_countries):
     # Separate nonzero and zero-value countries
     nonzero_data = sorted_data[sorted_data[selected_column] > 0]
     zero_data = sorted_data[sorted_data[selected_column] == 0]
-    
+
     # Build x-axis labels (countries) and y-values (values)
-    x_labels = list(nonzero_data['country'])
+    x_labels = []
+    y_values = []
+
     if not zero_data.empty:
         x_labels.append("Other (0)")
-    y_values = list(nonzero_data[selected_column])
-    if not zero_data.empty:
         y_values.append(0)
+        
+    # Then add nonzero data
+    x_labels += list(nonzero_data['country'])
+    y_values += list(nonzero_data[selected_column])
     
     # Create vertical bar plot (main bars)
     bar_fig = go.Figure()
@@ -371,7 +424,7 @@ def create_world_map(data, selected_column, selected_date, selected_countries=No
 )
 def update_bar_and_map(freq, selected_column, selected_date, selected_countries):
     bar_fig = create_bar_plot(freq, selected_column, selected_date, selected_countries)
-    map_fig = update_acled_event_map(iso3_data, acled_event_data, selected_column, selected_date, selected_countries)
+    map_fig = update_acled_event_map(iso3_data, acled_event_data, selected_column, selected_date, selected_countries, freq)
     #map_fig = create_world_map(data, selected_column, selected_date, selected_countries)
     return bar_fig, map_fig
 
